@@ -1,34 +1,37 @@
 import React from "react";
-import logo from './logo.svg';
-import './App.css';
+import "./App.css";
+import {Menu} from "components/Menu";
+
 const PouchDB = require("pouchdb");
 
 class App extends React.Component
 {
-  constructor(props)
-  {
-    super(props);
+	constructor(props)
+	{
+		super(props);
 
-    this.state = {
-      apiResponse: "Hey"
-    }
+		this.state = {
+			currentView: <Menu />, // Holds the top-level view to be rendered to the app
+			apiResponse: "Hey"
+		};
 
-  }
+	}
 
-  componentWillMount() {
-    fetch("users")
-        .then(res => res.text())
-        .then(res => this.setState({ apiResponse: res }));
-  }
+	componentWillMount()
+	{
+		fetch("users")
+			.then(res => res.text())
+			.then(res => this.setState({apiResponse: res}));
+	}
 
-  render()
-  {
-    return (
-        <div className="App">
-          <p>{this.state.apiResponse}</p>
-        </div>
-    );
-  }
+	render()
+	{
+		return (
+			<div className="App">
+				{this.state.currentView}
+			</div>
+		);
+	}
 }
 
 export default App;
