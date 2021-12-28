@@ -1,6 +1,6 @@
 import React from "react";
 
-export class MenuButton extends React
+export class MenuButton extends React.Component
 {
 	constructor(props)
 	{

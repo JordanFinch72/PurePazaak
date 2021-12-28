@@ -13,44 +13,46 @@ class App extends React.Component
 	{
 		super(props);
 
-		let menuButtons = [
-			<MenuButton text={"Sign In"} handler={this.onLoginClick} />,
-			<MenuButton text={"Register"} handler={this.onRegisterClick} />
-		];
+		this.state = {
+			currentView: null,
+			currentUser: null,
+			apiResponse: "Hey"
+		};
+
+		this.initialise = this.initialise.bind(this);
 		this.onLoginClick = this.onLoginClick.bind(this);
 		this.onRegisterClick = this.onRegisterClick.bind(this);
 		this.authenticateUser = this.authenticateUser.bind(this);
 		this.registerUser = this.registerUser.bind(this);
 
-		this.state = {
-			currentView: <Menu currentUser={this.state.currentUser} menuButtons={menuButtons} />, // Holds the top-level view component to be rendered to the app
-			currentUser: null,
-			apiResponse: "Hey"
-		};
-
 	}
 
 	componentWillMount()
 	{
+		this.initialise();
+
 		fetch("users")
 			.then(res => res.text())
 			.then(res => this.setState({apiResponse: res}));
 	}
 
 	/* Handlers */
-	onLoginClick(e, data)
+	initialise()
 	{
-		console.log(e);
-		console.log(data);
-
-		let loginForm = <LoginForm handler={this.authenticateUser} />
+		let menuButtons = [
+			<MenuButton text={"Sign In"} handler={this.onLoginClick} />,
+			<MenuButton text={"Register"} handler={this.onRegisterClick} />
+		];
+		this.setState({currentView: <Menu currentUser={null} menuButtons={menuButtons} />});
+	}
+	onLoginClick()
+	{
+		let loginForm = <LoginForm handler={this.authenticateUser} backHandler={this.initialise} />
 		this.setState({currentView: loginForm});
 	}
-	onRegisterClick(e, data)
+	onRegisterClick()
 	{
-		console.log(e);
-		console.log(data);
-		let registerForm = <RegisterForm handler={this.registerUser} />
+		let registerForm = <RegisterForm handler={this.registerUser} backHandler={this.initialise} />
 		this.setState({currentView: registerForm});
 	}
 	authenticateUser(e, data)
@@ -89,7 +91,6 @@ class App extends React.Component
 
 			currentView = <Menu currentUser={this.state.currentUser} menuButtons={menuButtons} />
 		}*/
-
 
 
 		return (
