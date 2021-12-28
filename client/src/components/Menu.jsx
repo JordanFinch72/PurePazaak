@@ -10,19 +10,11 @@ export class Menu extends React
 
 	render()
 	{
-		// Conditional rendering
-		let menuButtons = [];
-		if(this.props.currentUser !== null)
-		{
-			menuButtons = [
-				<MenuButton text={"Singleplayer"} handler={} />,
-				<MenuButton text={"Multiplayer"} handler={} />,
-				<MenuButton text={"Leaderboards"} handler={} />
-			];
-		}
 
 		return(
-			<div></div>
+			<div className={"main-menu"}>
+				{this.props.menuButtons}
+			</div>
 		)
 	}
 }
