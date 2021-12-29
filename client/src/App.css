@@ -44,11 +44,14 @@ div.button-container div.button:nth-child(0), div.button-container div.button:nt
 div.card {
     display: flex;
     flex-flow: column;
-    background-color: grey;
     justify-content: space-between;
+
+    width: 73px;
+    height: 102px;
     padding: 0.6em 0.4em 0.3em;
-    width: 72.92px;
-    height: 102.08px;
+
+    background-color: #CBCBCB;
+    box-shadow: 0px 0px 4px 2px rgba(0, 0, 0, 0.3);
 }
 
 div.card div.upper-box {
@@ -60,9 +63,6 @@ div.card div.upper-box {
     box-shadow: inset 0px 0px 4px 2px rgba(0, 0, 0, 0.25);
 }
 div.card div.upper-box div.value-box {
-    background-color: #2F2F2F;
-}
-div.card div.upper-box.slot div.value-box {
     display: flex;
     flex-flow: row;
     justify-content: center;
@@ -70,6 +70,11 @@ div.card div.upper-box.slot div.value-box {
     background-color: #2F2F2F;
     flex-basis: 80%;
     height: 60%;
+
+    color: #E2E2E2;
+}
+div.card div.upper-box.slot div.value-box {
+    background-color: #4F4F4F;
 }
 div.card div.lower-box {
     flex-basis: 25%;

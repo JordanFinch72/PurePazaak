@@ -13,20 +13,16 @@ export class CardZone extends React.Component
 	render()
 	{
 		let cardComponents = [];
+		console.log("CARDZONE");
 		for(let i = 0; i < 9; ++i)
 		{
-			let card = this.props.cards.shift();
+			let card = this.props.cards[i];
 			if(card)
 				cardComponents.push(<Card type={card.type} value={card.value} onSwitchClick={this.onSwitchClick} />);
 			else
 				cardComponents.push(<Card type={"slot"} onSwitchClick={this.onSwitchClick} />);
-		}
-		for(let card in this.props.cards)
-		{
-			if(this.props.cards.hasOwnProperty(card))
-			{
-				card = this.props.cards[card];
-			}
+
+			console.log(card);
 		}
 
 

@@ -15,7 +15,7 @@ export class Gameboard extends React.Component
 				username: this.props.user.username,
 				deck: this.props.user.deck,
 				hand: [],
-				playZone: [{type: "positive", value: "3"}],
+				cardZone: [],
 				roundScore: 0,
 				roundCount: 0
 			},
@@ -28,10 +28,11 @@ export class Gameboard extends React.Component
 					{type: "negative", value: "6"}
 				],
 				hand: [],
-				playZone: [],
+				cardZone: [],
 				roundScore: 0,
 				roundCount: 0
 			},
+			currentTurn: null
 		}
 
 		this.onSwitchClick = this.onSwitchClick.bind(this);
@@ -79,7 +80,7 @@ export class Gameboard extends React.Component
 		let playerDeck = this.state.player.deck, opponentDeck = this.state.opponent.deck;
 		let playerHand = [], opponentHand = [];
 
-		// Shuffle deck
+		// Shuffle deck, draw hands
 		for(let i = 0; i < 500; ++i)
 		{
 			let card1 = this.rand(0, 9);
@@ -96,6 +97,10 @@ export class Gameboard extends React.Component
 			opponentHand.push(opponentDeck.pop());
 		}
 
+		// Determine first player
+		let toss = this.rand(0, 1);
+		let firstPlayer = (toss === 0) ? "player" : "opponent";
+
 		this.setState((prevState) => ({
 			player: {
 				...prevState.player,
@@ -104,8 +109,39 @@ export class Gameboard extends React.Component
 			opponent: {
 				...prevState.opponent,
 				hand: opponentHand
-			}
-		}));
+			},
+			currentTurn: firstPlayer
+		}), this.startTurn);
+	}
+
+	startTurn()
+	{
+		// Draw turn card from the game deck (evenly distributed deck of infinite cards, so no need for an array)
+		let cardValue = this.rand(1, 10);
+		console.log("TURN CARD: " + cardValue);
+		if(this.state.currentTurn === "player")
+		{
+			let cardZone = this.state.player.cardZone;
+			cardZone.push({type: "turn", value: cardValue});
+			this.setState((prevState) => ({
+				player: {
+					...prevState.player,
+					cardZone: cardZone
+				}
+			}));
+		}
+		else if(this.state.currentTurn === "opponent")
+		{
+			let cardZone = this.state.opponent.cardZone;
+			cardZone.push({type: "turn", value: cardValue});
+			this.setState((prevState) => ({
+				opponent: {
+					...prevState.opponent,
+					cardZone: cardZone
+				}
+			}));
+		}
+
 	}
 
 	rand(min, max)
@@ -117,6 +153,8 @@ export class Gameboard extends React.Component
 
 	render()
 	{
+		console.log("GAMEBOARD");
+
 		return(
 			<div className={"gameboard"}>
 				<div className={"third-container"}>
@@ -126,7 +164,7 @@ export class Gameboard extends React.Component
 							<Label text={this.state.player.roundScore }/>
 						</div>
 						<div className={"box"}>
-							<CardZone cards={this.state.player.playZone} onSwitchClick={this.onSwitchClick} />
+							<CardZone cards={this.state.player.cardZone} onSwitchClick={this.onSwitchClick} />
 							<RoundCounter value={this.state.player.roundCount} />
 						</div>
 					</div>
@@ -143,12 +181,12 @@ export class Gameboard extends React.Component
 				<div className={"third-container"}>
 					<div className={"cardzone-container"}>
 						<div className={"box-1"}>
-							<Label text={this.state.player.username} />
-							<Label text={this.state.player.roundScore }/>
+							<Label text={this.state.opponent.username} />
+							<Label text={this.state.opponent.roundScore }/>
 						</div>
 						<div className={"box-2"}>
-							<CardZone cards={this.state.player.playZone} onSwitchClick={this.onSwitchClick} />
-							<RoundCounter value={this.state.player.roundCount} />
+							<CardZone cards={this.state.opponent.cardZone} onSwitchClick={this.onSwitchClick} />
+							<RoundCounter value={this.state.opponent.roundCount} />
 						</div>
 					</div>
 					<div className={"handzone-container"}>
