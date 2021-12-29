@@ -1,6 +1,6 @@
 import React from "react";
 
-export class Gameboard extends React
+export class Label extends React.Component
 {
 	constructor(props)
 	{

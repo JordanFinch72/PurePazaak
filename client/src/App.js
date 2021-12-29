@@ -4,6 +4,7 @@ import {Menu} from "./components/Menu";
 import {MenuButton} from "./components/MenuButton";
 import {LoginForm} from "./components/LoginForm";
 import {RegisterForm} from "./components/RegisterForm";
+import {Gameboard} from "./components/gameboard/Gameboard";
 
 const PouchDB = require("pouchdb");
 
@@ -15,7 +16,15 @@ class App extends React.Component
 
 		this.state = {
 			currentView: null,
-			currentUser: null,
+			currentUser: {
+				username: "Nadroj H'cnif",
+				deck: [ // Can be changed by user at the beginning of each match (and perhaps later in a separate "Choose Deck" view)
+					{type: "positive", value: "1"},{type: "positive", value: "1"},{type: "positive", value: "2"},
+					{type: "negative", value: "2"},{type: "positive", value: "3"},{type: "positive", value: "3"},
+					{type: "negative", value: "4"},{type: "positive", value: "4"},{type: "positive", value: "5"},
+					{type: "negative", value: "6"}
+				]
+			},
 			apiResponse: "Hey"
 		};
 
@@ -68,33 +77,9 @@ class App extends React.Component
 
 	render()
 	{
-		// Conditional rendering
-		let currentView;
-		/*if(currentView === "Menu")
-		{
-			let menuButtons = [];
-			if(this.state.currentUser !== null)
-			{
-				menuButtons = [
-					<MenuButton text={"Singleplayer"} handler={} />,
-					<MenuButton text={"Multiplayer"} handler={} />,
-					<MenuButton text={"Leaderboards"} handler={} />
-				];
-			}
-			else
-			{
-				menuButtons = [
-					<MenuButton text={"Sign In"} handler={this.onSignInClick} />,
-					<MenuButton text={"Register"} handler={this.onRegisterClick} />
-				];
-			}
-
-			currentView = <Menu currentUser={this.state.currentUser} menuButtons={menuButtons} />
-		}*/
-
-
 		return (
 			<div className="App">
+				<Gameboard user={this.state.currentUser} />
 				{this.state.currentView}
 			</div>
 		);
