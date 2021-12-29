@@ -160,12 +160,12 @@ export class Gameboard extends React.Component
 				<div className={"third-container"}>
 					<div className={"cardzone-container"}>
 						<div className={"box"}>
-							<Label text={this.state.player.username} />
-							<Label text={this.state.player.roundScore }/>
+							<Label text={this.state.player.username} name={"player-name"} />
+							<CardZone cards={this.state.player.cardZone} onSwitchClick={this.onSwitchClick} />
 						</div>
 						<div className={"box"}>
-							<CardZone cards={this.state.player.cardZone} onSwitchClick={this.onSwitchClick} />
-							<RoundCounter value={this.state.player.roundCount} />
+							<Label text={this.state.player.roundScore} name={"round-score"} />
+							<RoundCounter roundCount={this.state.player.roundCount} />
 						</div>
 					</div>
 					<div className={"handzone-container"}>
@@ -181,12 +181,12 @@ export class Gameboard extends React.Component
 				<div className={"third-container"}>
 					<div className={"cardzone-container"}>
 						<div className={"box-1"}>
-							<Label text={this.state.opponent.username} />
-							<Label text={this.state.opponent.roundScore }/>
+							<Label text={this.state.opponent.username} shape={"rect"} width={"277px"} height={"41px"} />
+							<Label text={this.state.opponent.roundScore} shape={"ellipsis"} width={"40px"} height={"40px"} />
 						</div>
 						<div className={"box-2"}>
 							<CardZone cards={this.state.opponent.cardZone} onSwitchClick={this.onSwitchClick} />
-							<RoundCounter value={this.state.opponent.roundCount} />
+							<RoundCounter roundCount={this.state.opponent.roundCount} />
 						</div>
 					</div>
 					<div className={"handzone-container"}>

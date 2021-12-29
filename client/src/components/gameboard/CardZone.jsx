@@ -1,5 +1,6 @@
 import React from "react";
 import {Card} from "./Card";
+import {CardSlot} from "./CardSlot";
 
 export class CardZone extends React.Component
 {
@@ -20,7 +21,7 @@ export class CardZone extends React.Component
 			if(card)
 				cardComponents.push(<Card type={card.type} value={card.value} onSwitchClick={this.onSwitchClick} />);
 			else
-				cardComponents.push(<Card type={"slot"} onSwitchClick={this.onSwitchClick} />);
+				cardComponents.push(<CardSlot />);
 
 			console.log(card);
 		}

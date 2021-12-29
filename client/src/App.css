@@ -41,14 +41,50 @@ div.button-container div.button:nth-child(0), div.button-container div.button:nt
     flex-basis: 50%;
 }
 
+div.label-container div.label {
+    display: flex;
+    flex-flow: row;
+    justify-content: center; /* Default alignment */
+    align-items: center; /* Default alignment */
+    background: #585858;
+    box-shadow: inset 0px 0px 4px 5px rgba(0, 0, 0, 0.25);
+    height: 100%;
+}
+div.label-container div.label.player-name {
+    justify-content: start;
+    padding-left: 1em;
+}
+div.label-container div.label.round-score {
+    width: 40px;
+    height: 40px;
+    border-radius: 20px;
+}
+div.round-counter {
+    display: flex;
+    flex-flow: column;
+    align-items: center;
+    width: 41px;
+    height: 128px;
+
+    background: #585858;
+    box-shadow: inset 0px 0px 4px 5px rgba(0, 0, 0, 0.25);
+}
+div.round-counter div.pip {
+    background: #B4B4B4;
+    box-shadow: 0px 0px 4px 1px rgba(0, 0, 0, 0.25), inset 0px 0px 4px 3px rgba(0, 0, 0, 0.25);
+
+    width: 34px;
+    height: 34px;
+    border-radius: 17px;
+}
+div.round-counter div.pip.full {
+    background: #DC2525;
+}
+
 div.card {
     display: flex;
     flex-flow: column;
     justify-content: space-between;
-
-    width: 73px;
-    height: 102px;
-    padding: 0.6em 0.4em 0.3em;
 
     background-color: #CBCBCB;
     box-shadow: 0px 0px 4px 2px rgba(0, 0, 0, 0.3);
@@ -61,6 +97,7 @@ div.card div.upper-box {
     align-items: center;
     flex-basis: 60%;
     box-shadow: inset 0px 0px 4px 2px rgba(0, 0, 0, 0.25);
+    margin: 0.6em 0.4em 0.3em;
 }
 div.card div.upper-box div.value-box {
     display: flex;
@@ -73,18 +110,27 @@ div.card div.upper-box div.value-box {
 
     color: #E2E2E2;
 }
-div.card div.upper-box.slot div.value-box {
+div.card div.upper-box.facedown div.value-box {
     background-color: #4F4F4F;
 }
 div.card div.lower-box {
     flex-basis: 25%;
     box-shadow: inset 0px 0px 4px 2px rgba(0, 0, 0, 0.25);
+    margin: 0.6em 0.4em 0.3em;
 }
 div.card div.upper-box.turn, div.card div.lower-box.turn  {background-color: #46762F;}
 div.card div.upper-box.positive, div.card div.lower-box.positive {background-color: #2F5476;}
 div.card div.upper-box.negative, div.card div.lower-box.negative {background-color: #762F2F;}
 div.card div.upper-box.special, div.card div.lower-box.special {background-color: #CAA200;}
-div.card div.upper-box.slot, div.card div.lower-box.slot {background-color: #666666;}
+div.card div.upper-box.facedown, div.card div.lower-box.facedown {background-color: #666666;}
+
+div.card-slot {
+    width: 4.5em;
+    height: 6.4em;
+
+    background: #858585;
+    box-shadow: inset -2px 0px 4px 2px rgba(0, 0, 0, 0.25);
+}
 
 /* Player Areas */
 div.third-container {
@@ -95,15 +141,17 @@ div.third-container {
 }
 div.third-container div.cardzone-container {
     display: flex;
-    flex-flow: column;
+    flex-flow: column wrap;
+    width: 70%;
 }
 div.third-container div.cardzone-container div.box {
     display: flex;
-    flex-flow: row;
-}
-div.third-container div.cardzone-container div.box > div {
+    flex-flow: column;
     flex-basis: 50%;
+    width: 100%;
 }
+
+
 
 /* CardZone */
 div.cardzone {
@@ -112,11 +160,11 @@ div.cardzone {
     justify-content: space-evenly;
     align-content: space-evenly;
     background: #8D8D8D;
-    height: 100%;
+    /*width: 277.08px;
+    height: 350px;*/
     box-shadow: inset 0px 0px 4px 5px rgb(0 0 0 / 25%);
     padding: 0.3em;
 }
-
-div.cardzone div.card {
-    flex-basis: 30%;
+div.cardzone div.card, div.cardzone div.card-slot {
+    flex-basis: 33%;
 }
