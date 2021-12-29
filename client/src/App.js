@@ -80,7 +80,7 @@ class App extends React.Component
 		return (
 			<div className="App">
 				<Gameboard user={this.state.currentUser} />
-				{this.state.currentView}
+				{/*this.state.currentView*/}
 			</div>
 		);
 	}

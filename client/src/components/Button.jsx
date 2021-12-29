@@ -10,7 +10,9 @@ export class Button extends React.Component
 	render()
 	{
 		return(
-			<div></div>
+			<div className={"button"} onClick={this.props.handler}>
+				{this.props.text}
+			</div>
 		)
 	}
 }

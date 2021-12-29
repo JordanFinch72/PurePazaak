@@ -1,5 +1,9 @@
 import React from "react";
 import {Label} from "./Label";
+import {CardZone} from "./CardZone";
+import {RoundCounter} from "./RoundCounter";
+import {HandZone} from "./HandZone";
+import {Button} from "../Button";
 
 export class Gameboard extends React.Component
 {
@@ -11,7 +15,7 @@ export class Gameboard extends React.Component
 				username: this.props.user.username,
 				deck: this.props.user.deck,
 				hand: [],
-				playZone: [],
+				playZone: [{type: "positive", value: "3"}],
 				roundScore: 0,
 				roundCount: 0
 			},
@@ -29,6 +33,45 @@ export class Gameboard extends React.Component
 				roundCount: 0
 			},
 		}
+
+		this.onSwitchClick = this.onSwitchClick.bind(this);
+	}
+
+	onSwitchClick(playerType, card, index, mode)
+	{
+		// Switch card from negative to positive or vice versa
+		let value = this.state.value;
+		if((mode === "negative" && value > 0)
+			|| mode === "positive" && value < 0)
+			card.value = -value;
+
+		let hand;
+		if(playerType === "player")
+			hand = this.state.player.hand;
+		else if(playerType === "opponent")
+			hand = this.state.opponent.hand;
+
+		hand[index] = card;
+
+		if(playerType === "player")
+		{
+			this.setState((prevState) => ({
+				player: {
+					...prevState.player,
+					hand: hand
+				}
+			}));
+		}
+		else if(playerType === "opponent")
+		{
+			this.setState((prevState) => ({
+				opponent: {
+					...prevState.opponent,
+					hand: hand
+				}
+			}));
+		}
+
 	}
 
 	componentWillMount()
@@ -49,8 +92,8 @@ export class Gameboard extends React.Component
 		}
 		for(let i = 0; i < 4; ++i)
 		{
-			playerHand.add(playerDeck.pop());
-			opponentHand.add(opponentDeck.pop());
+			playerHand.push(playerDeck.pop());
+			opponentHand.push(opponentDeck.pop());
 		}
 
 		this.setState((prevState) => ({
@@ -62,7 +105,7 @@ export class Gameboard extends React.Component
 				...prevState.opponent,
 				hand: opponentHand
 			}
-		}))
+		}));
 	}
 
 	rand(min, max)
@@ -70,19 +113,42 @@ export class Gameboard extends React.Component
 		return Math.floor(Math.random() * (max - min + 1) ) + min;
 	}
 
+
+
 	render()
 	{
 		return(
 			<div className={"gameboard"}>
-				<div className={"player-area-container"}>
-					<div className={"playzone-container"}>
+				<div className={"third-container"}>
+					<div className={"cardzone-container"}>
+						<div className={"box"}>
+							<Label text={this.state.player.username} />
+							<Label text={this.state.player.roundScore }/>
+						</div>
+						<div className={"box"}>
+							<CardZone cards={this.state.player.playZone} onSwitchClick={this.onSwitchClick} />
+							<RoundCounter value={this.state.player.roundCount} />
+						</div>
+					</div>
+					<div className={"handzone-container"}>
+						<Label />
+						<HandZone />
+					</div>
+				</div>
+				<div className={"third-container"}>
+					<Button text={"END TURN"} handler={this.rand} />
+					<Button text={"STAND"} handler={this.rand} />
+					<Button text={"FORFEIT GAME"} handler={this.rand} />
+				</div>
+				<div className={"third-container"}>
+					<div className={"cardzone-container"}>
 						<div className={"box-1"}>
 							<Label text={this.state.player.username} />
-							<Label text={this.state.roundScores[0] }/>
+							<Label text={this.state.player.roundScore }/>
 						</div>
 						<div className={"box-2"}>
-							<PlayZone />
-							<RoundCounter />
+							<CardZone cards={this.state.player.playZone} onSwitchClick={this.onSwitchClick} />
+							<RoundCounter value={this.state.player.roundCount} />
 						</div>
 					</div>
 					<div className={"handzone-container"}>
