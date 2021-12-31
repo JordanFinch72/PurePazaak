@@ -14,7 +14,6 @@ export class CardZone extends React.Component
 	render()
 	{
 		let cardComponents = [];
-		console.log("CARDZONE");
 		for(let i = 0; i < 9; ++i)
 		{
 			let card = this.props.cards[i];

@@ -169,8 +169,8 @@ export class Gameboard extends React.Component
 						</div>
 					</div>
 					<div className={"handzone-container"}>
-						<Label />
-						<HandZone />
+						<Label text={this.state.player.username + "'s Hand"} name={"player-hand"} />
+						<HandZone cards={this.state.player.hand} onSwitchClick={this.onSwitchClick} />
 					</div>
 				</div>
 				<div className={"third-container"}>
@@ -180,18 +180,18 @@ export class Gameboard extends React.Component
 				</div>
 				<div className={"third-container"}>
 					<div className={"cardzone-container"}>
-						<div className={"box-1"}>
-							<Label text={this.state.opponent.username} shape={"rect"} width={"277px"} height={"41px"} />
-							<Label text={this.state.opponent.roundScore} shape={"ellipsis"} width={"40px"} height={"40px"} />
-						</div>
-						<div className={"box-2"}>
+						<div className={"box"}>
+							<Label text={this.state.opponent.username} name={"player-name"} />
 							<CardZone cards={this.state.opponent.cardZone} onSwitchClick={this.onSwitchClick} />
+						</div>
+						<div className={"box"}>
+							<Label text={this.state.opponent.roundScore} name={"round-score"} />
 							<RoundCounter roundCount={this.state.opponent.roundCount} />
 						</div>
 					</div>
 					<div className={"handzone-container"}>
-						<Label />
-						<HandZone />
+						<Label text={this.state.opponent.username + "'s Hand"} name={"player-hand"} />
+						<HandZone cards={this.state.opponent.hand} onSwitchClick={this.onSwitchClick} />
 					</div>
 				</div>
 			</div>
