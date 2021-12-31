@@ -1,6 +1,6 @@
 import React from "react";
 
-export class Button extends React.Component
+export class ChatButton extends React.Component
 {
 	constructor(props)
 	{
@@ -12,7 +12,7 @@ export class Button extends React.Component
 	render()
 	{
 		return(
-			<div className={"button"} onClick={this.props.handler}>
+			<div className={"chat-button"} onClick={this.props.handler}>
 				{this.props.text}
 			</div>
 		)

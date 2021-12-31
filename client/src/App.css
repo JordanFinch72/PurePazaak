@@ -8,6 +8,19 @@ html, body, div#root, div.App {
     background-color: #4F4F4F;
 }
 
+@font-face {
+    font-family: 'BankGothic';
+    src: url("fonts/BankGothic Regular.ttf");
+}
+@font-face {
+    font-family: 'Aurebesh';
+    src: url("fonts/Aurebesh.ttf");
+}
+@font-face {
+    font-family: 'OldRepublic';
+    src: url("fonts/Old_R.ttf");
+}
+
 /* Gameboard */
 div.gameboard {
     display: flex;
@@ -19,36 +32,50 @@ div.gameboard {
     border: 2px solid #4F4F4F;
     box-shadow: inset 0 0 9px 5px rgb(0 0 0 / 75%);
 }
-
-div.playzone-container div.box {
+div.third-container {
     display: flex;
-    flex-flow: row;
+    flex-flow: column;
+    flex-basis: 33%;
+    align-items: center;
+    height: 100%;
+    justify-content: space-around;
 }
-
-div.third-container, div.cardzone-container, div.handzone-container {
-    display: flex;
-    flex-flow: row wrap;
-}
-div.third-container:last-child div.cardzone-container, div.third-container:last-child div.handzone-container  {
+div.third-container.player-area:last-child div.cardzone-container, div.third-container.player-area:last-child div.handzone-container  {
     flex-flow: row-reverse wrap;
-}
-
-div.playzone-container {
-    justify-content: center;
-}
-
-div.playzone-container div.box {
-    display: flex;
-    flex-flow: row;
 }
 
 div.button-container {
     display: flex;
     flex-flow: row wrap;
+    justify-content: space-between;
+    flex-basis: 25%;
+    width: 50%;
+    justify-self: flex-end;
 }
+div.button-container div.button {
+    display: flex;
+    flex-flow: row;
+    justify-content: center;
+    align-items: center;
+    margin: 0.2em;
 
+    font-family: BankGothic, sans-serif;
+    font-size: 1.3em;
+    color: #FFCC00;
+    cursor: default;
+
+    background: #626262;
+    border: 1px solid #626262;
+    box-shadow: 0px 0px 2px 2px rgb(0 0 0 / 50%);
+}
+div.button-container div.button:hover {
+    background-color: #575757;
+}
 div.button-container div.button:nth-child(1), div.button-container div.button:nth-child(2) {
-    flex-basis: 50%;
+    flex-basis: 45%;
+}
+div.button-container div.button:nth-child(3) {
+    flex-basis: 100%;
 }
 
 div.label-container div.label {
@@ -147,50 +174,59 @@ div.card div.upper-box.facedown, div.card div.lower-box.facedown {background-col
 
 
 /* Player Areas */
-div.third-container {
-    display: flex;
-    flex-flow: column;
-    flex-basis: 33%;
-    align-items: center;
-    height: 100%;
-    justify-content: space-around;
-}
-div.third-container div.cardzone-container {
+div.player-area div.cardzone-container {
     display: flex;
     flex-flow: row wrap;
     width: 100%;
     align-self: center;
     justify-content: flex-end;
 }
-div.third-container div.cardzone-container div.box {
+div.player-area div.cardzone-container div.box {
     display: flex;
     flex-flow: column;
 }
-div.third-container div.cardzone-container div.box:nth-child(1) {
+div.player-area div.cardzone-container div.box:nth-child(1) {
     flex-basis: 55%;
 }
-div.third-container div.cardzone-container div.box:nth-child(2) {
+div.player-area div.cardzone-container div.box:nth-child(2) {
     margin-left: 0.5em;
     flex-basis: 7%;
 }
-div.third-container:last-child div.cardzone-container div.box:nth-child(2) {
+div.player-area:last-child div.cardzone-container div.box:nth-child(2) {
     margin: 0 0.5em 0 0;
     flex-basis: 7%;
 }
-div.third-container div.cardzone-container div.box div.label-container {
+div.player-area div.cardzone-container div.box div.label-container {
     margin-bottom: 0.5em;
 }
-div.third-container div.cardzone-container div.box div.cardzone {
+div.player-area div.cardzone-container div.box div.cardzone {
     flex-basis: 100%;
 }
 
-div.third-container div.handzone-container {
+div.player-area div.handzone-container {
+    display: flex;
+    flex-flow: row wrap;
     width: 100%;
     justify-content: flex-end;
 }
-div.third-container div.handzone-container div.label-container {
+div.player-area div.handzone-container div.label-container {
     width: 70%;
     margin-bottom: 0.5em;
+}
+
+/* Chat/Button Area */
+div.third-container.chat-button-area {
+    display: flex;
+    flex-flow: column;
+    justify-content: center;
+}
+
+div.chat-button-area .chat-box-container {
+    display: flex;
+    flex-flow: row;
+    justify-content: center;
+    align-items: center;
+    flex-basis: 67%;
 }
 
 

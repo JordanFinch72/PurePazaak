@@ -4,6 +4,7 @@ import {CardZone} from "./CardZone";
 import {RoundCounter} from "./RoundCounter";
 import {HandZone} from "./HandZone";
 import {Button} from "../Button";
+import {ChatBox} from "./ChatBox";
 
 export class Gameboard extends React.Component
 {
@@ -153,11 +154,9 @@ export class Gameboard extends React.Component
 
 	render()
 	{
-		console.log("GAMEBOARD");
-
 		return(
 			<div className={"gameboard"}>
-				<div className={"third-container"}>
+				<div className={"third-container player-area"}>
 					<div className={"cardzone-container"}>
 						<div className={"box"}>
 							<Label text={this.state.player.username} name={"player-name"} />
@@ -173,12 +172,17 @@ export class Gameboard extends React.Component
 						<HandZone cards={this.state.player.hand} onSwitchClick={this.onSwitchClick} />
 					</div>
 				</div>
-				<div className={"third-container"}>
-					<Button text={"END TURN"} handler={this.rand} />
-					<Button text={"STAND"} handler={this.rand} />
-					<Button text={"FORFEIT GAME"} handler={this.rand} />
+				<div className={"third-container chat-button-area"}>
+					<div className={"chat-box-container"}>
+						<ChatBox users={[this.state.player.username, this.state.opponent.username]} />
+					</div>
+					<div className={"button-container"}>
+						<Button text={"END TURN"} handler={this.rand} />
+						<Button text={"STAND"} handler={this.rand} />
+						<Button text={"FORFEIT GAME"} handler={this.rand} />
+					</div>
 				</div>
-				<div className={"third-container"}>
+				<div className={"third-container player-area"}>
 					<div className={"cardzone-container"}>
 						<div className={"box"}>
 							<Label text={this.state.opponent.username} name={"player-name"} />
