@@ -8,7 +8,7 @@ export class CardZone extends React.Component
 	{
 		super(props);
 
-		this.onSwitchClick = this.props.onSwitchClick.bind(this);
+		this.onCardClick = (this.props.onCardClick) ? this.props.onCardClick.bind(this) : function(){};
 	}
 
 	render()
@@ -18,11 +18,12 @@ export class CardZone extends React.Component
 		{
 			let card = this.props.cards[i];
 			if(card)
-				cardComponents.push(<Card type={card.type} value={card.value} onSwitchClick={this.onSwitchClick} />);
+			{
+				let justPlayed = (this.props.cards[i+1] === undefined && card.type !== "turn");
+				cardComponents.push(<Card card={card} index={i} justPlayed={justPlayed} zone={"cardzone"} onCardClick={this.onCardClick} />);
+			}
 			else
 				cardComponents.push(<CardSlot />);
-
-			console.log(card);
 		}
 
 

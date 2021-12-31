@@ -23,56 +23,115 @@ export class Gameboard extends React.Component
 			opponent: { // TODO: Dummy data
 				username: "The Champ",
 				deck: [
-					{type: "positive", value: "1"},{type: "positive", value: "1"},{type: "positive", value: "2"},
-					{type: "negative", value: "2"},{type: "positive", value: "3"},{type: "positive", value: "3"},
-					{type: "negative", value: "4"},{type: "positive", value: "4"},{type: "positive", value: "5"},
-					{type: "negative", value: "6"}
+					{type: "positive", value: 1},{type: "positive", value: 1},{type: "positive", value: 2},
+					{type: "negative", value: 2},{type: "positive", value: 3},{type: "positive", value: 3},
+					{type: "negative", value: -4},{type: "positive", value: 4},{type: "positive", value: 5},
+					{type: "negative", value: -6}
 				],
 				hand: [],
 				cardZone: [],
 				roundScore: 0,
 				roundCount: 0
 			},
-			currentTurn: null
+			currentTurn: null,
+			cardPlayed: null // Hand index of card that has just been played
 		}
 
+		this.onCardClick = this.onCardClick.bind(this);
 		this.onSwitchClick = this.onSwitchClick.bind(this);
 	}
 
+	/**
+	 *
+	 * @param card
+	 * @param index: Index of card from parent's perspective (e.g. cardZone index if Card in CardZone is clicked)
+	 * @param zone
+	 */
+	onCardClick(card, index, zone)
+	{
+		if(this.state.currentTurn === "player")
+		{
+			// Check if card has already been played
+			if(this.state.cardPlayed)
+			{
+				// Allow player to withdraw card (not in original game; played card will not be shown to opponent until they hit "END TURN" or "STAND")
+				if(zone === "cardzone" && card.type !== "turn")
+				{
+					// Send card from CardZone to hand
+					let hand = this.state.player.hand;
+					let cardZone = this.state.player.cardZone;
+					let roundScore = this.state.player.roundScore;
+					cardZone.splice(index,1);
+					hand[this.state.cardPlayed] = card;
+
+					// Re-compute round score
+					if(card.type === "special")
+					{
+						// TODO: Special card handling
+					}
+					else
+					{
+						roundScore -= card.value;
+					}
+
+					this.setState((prevState) => ({
+						player: {
+							...prevState.player,
+							hand: hand,
+							cardZone: cardZone,
+							roundScore: roundScore
+						},
+						cardPlayed: null
+					}));
+				}
+			}
+			else if(zone === "handzone")
+			{
+				// Send card from hand to CardZone
+				let hand = this.state.player.hand;
+				let cardZone = this.state.player.cardZone;
+				let roundScore = this.state.player.roundScore;
+				delete hand[index];
+				cardZone.push(card);
+
+				// Re-compute round score
+				if(card.type === "special")
+				{
+					// TODO: Special card handling
+				}
+				else
+				{
+					roundScore += card.value;
+				}
+
+				this.setState((prevState) => ({
+					player: {
+						...prevState.player,
+						hand: hand,
+						cardZone: cardZone,
+						roundScore: roundScore
+					},
+					cardPlayed: index
+				}));
+			}
+		}
+	}
 	onSwitchClick(playerType, card, index, mode)
 	{
 		// Switch card from negative to positive or vice versa
 		let value = this.state.value;
-		if((mode === "negative" && value > 0)
-			|| mode === "positive" && value < 0)
+		if((mode === "negative" && value > 0) || (mode === "positive" && value < 0))
 			card.value = -value;
 
-		let hand;
-		if(playerType === "player")
-			hand = this.state.player.hand;
-		else if(playerType === "opponent")
-			hand = this.state.opponent.hand;
-
+		let hand = this.state[playerType].hand;
 		hand[index] = card;
 
-		if(playerType === "player")
-		{
-			this.setState((prevState) => ({
-				player: {
-					...prevState.player,
-					hand: hand
-				}
-			}));
-		}
-		else if(playerType === "opponent")
-		{
-			this.setState((prevState) => ({
-				opponent: {
-					...prevState.opponent,
-					hand: hand
-				}
-			}));
-		}
+		this.setState((prevState) => ({
+			[playerType]: {
+				...prevState[playerType],
+				hand: hand
+			}
+		}));
 
 	}
 
@@ -160,7 +219,7 @@ export class Gameboard extends React.Component
 					<div className={"cardzone-container"}>
 						<div className={"box"}>
 							<Label text={this.state.player.username} name={"player-name"} />
-							<CardZone cards={this.state.player.cardZone} onSwitchClick={this.onSwitchClick} />
+							<CardZone cards={this.state.player.cardZone} onCardClick={this.onCardClick} />
 						</div>
 						<div className={"box"}>
 							<Label text={this.state.player.roundScore} name={"round-score"} />
@@ -169,7 +228,7 @@ export class Gameboard extends React.Component
 					</div>
 					<div className={"handzone-container"}>
 						<Label text={this.state.player.username + "'s Hand"} name={"player-hand"} />
-						<HandZone cards={this.state.player.hand} onSwitchClick={this.onSwitchClick} />
+						<HandZone cards={this.state.player.hand} onCardClick={this.onCardClick} onSwitchClick={this.onSwitchClick} />
 					</div>
 				</div>
 				<div className={"third-container chat-button-area"}>
@@ -186,7 +245,7 @@ export class Gameboard extends React.Component
 					<div className={"cardzone-container"}>
 						<div className={"box"}>
 							<Label text={this.state.opponent.username} name={"player-name"} />
-							<CardZone cards={this.state.opponent.cardZone} onSwitchClick={this.onSwitchClick} />
+							<CardZone cards={this.state.opponent.cardZone} />
 						</div>
 						<div className={"box"}>
 							<Label text={this.state.opponent.roundScore} name={"round-score"} />
@@ -195,7 +254,7 @@ export class Gameboard extends React.Component
 					</div>
 					<div className={"handzone-container"}>
 						<Label text={this.state.opponent.username + "'s Hand"} name={"player-hand"} />
-						<HandZone cards={this.state.opponent.hand} onSwitchClick={this.onSwitchClick} />
+						<HandZone cards={this.state.opponent.hand} />
 					</div>
 				</div>
 			</div>

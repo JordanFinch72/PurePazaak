@@ -8,7 +8,8 @@ export class HandZone extends React.Component
 	{
 		super(props);
 
-		this.onSwitchClick = this.props.onSwitchClick.bind(this);
+		this.onCardClick = (this.props.onCardClick) ? this.props.onCardClick.bind(this) : function(){};
+		this.onSwitchClick = (this.props.onSwitchClick) ? this.props.onSwitchClick.bind(this) : function(){};
 	}
 
 	render()
@@ -18,7 +19,7 @@ export class HandZone extends React.Component
 		{
 			let card = this.props.cards[i];
 			if(card)
-				cardComponents.push(<Card type={card.type} value={card.value} onSwitchClick={this.onSwitchClick} />);
+				cardComponents.push(<Card card={card} index={i} zone={"handzone"} onCardClick={this.onCardClick} onSwitchClick={this.onSwitchClick} isFaceDown={this.props.isFaceDown} />);
 			else
 				cardComponents.push(<CardSlot />);
 		}

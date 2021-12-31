@@ -19,10 +19,10 @@ class App extends React.Component
 			currentUser: {
 				username: "Nadroj H'cnif",
 				deck: [ // Can be changed by user at the beginning of each match (and perhaps later in a separate "Choose Deck" view)
-					{type: "positive", value: "1"},{type: "positive", value: "1"},{type: "positive", value: "2"},
-					{type: "negative", value: "2"},{type: "positive", value: "3"},{type: "positive", value: "3"},
-					{type: "negative", value: "4"},{type: "positive", value: "4"},{type: "positive", value: "5"},
-					{type: "negative", value: "6"}
+					{type: "positive", value: 1},{type: "positive", value: 1},{type: "positive", value: 2},
+					{type: "negative", value: 2},{type: "positive", value: 3},{type: "positive", value: 3},
+					{type: "negative", value: -4},{type: "positive", value: 4},{type: "positive", value: 5},
+					{type: "negative", value: -6}
 				]
 			},
 			apiResponse: "Hey"
