@@ -1,4 +1,9 @@
 /* General */
+* {
+    font-family: "BankGothic", sans-serif;
+    font-size: 16px;
+}
+
 html, body, div#root, div.App {
     display: flex;
     align-items: center;
@@ -59,7 +64,6 @@ div.button-container div.button {
     align-items: center;
     margin: 0.2em;
 
-    font-family: BankGothic, sans-serif;
     font-size: 1.3em;
     color: #FFCC00;
     cursor: default;
@@ -79,12 +83,15 @@ div.button-container div.button:nth-child(3) {
 }
 
 div.label-container div.label {
+    font-family: "BankGothic", sans-serif;
+
     display: flex;
     flex-flow: row;
     justify-content: center; /* Default alignment */
     align-items: center; /* Default alignment */
-    height: 2.5em;
+    height: 1.75em;
     color: #E2E2E2;
+    font-size: 1.4em;
 }
 div.label-container div.label.player-name {
     justify-content: start;
@@ -251,12 +258,11 @@ div.chat-box div.messages-container {
     flex-flow: column;
 }
 div.chat-box div.messages-container div.message {
-    font-family: "BankGothic", sans-serif;
     border: 1px solid rgba(149, 149, 149, 0.5);
     width: fit-content;
     margin-bottom: 0.2em;
-    color: #E2E2E2;
     padding: 0.1em;
+    color: #E2E2E2;
 }
 div.chat-box div.messages-container div.message.player {
     background-color: rgba(0, 87, 255, 0.25);
@@ -271,7 +277,6 @@ div.chat-box div.controls-container {
     justify-content: space-between;
 }
 div.chat-box div.controls-container > input {
-    font-family: "BankGothic", sans-serif;
     flex-basis: 88%;
     background-color: #C4C4C4;
     margin: 0;
@@ -283,7 +288,6 @@ div.chat-box div.controls-container div.button-container {
     flex-basis: 10%;
 }
 div.chat-box div.controls-container div.button-container div.chat-button {
-    font-family: "BankGothic", sans-serif;
     display: flex;
     flex-flow: row;
     justify-content: center;
