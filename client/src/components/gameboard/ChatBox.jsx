@@ -47,7 +47,7 @@ export class ChatBox extends React.Component
 
 		return(
 			<div className={"chat-box"}>
-				<div className={"message-container"}>
+				<div className={"messages-container"}>
 					{messages}
 				</div>
 				<div className={"controls-container"}>

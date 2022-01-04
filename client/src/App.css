@@ -124,7 +124,7 @@ div.card {
     display: flex;
     flex-flow: column;
     justify-content: space-between;
-    width: 4.5vw;
+    width: 4.6vw;
     height: 11vh;
 
     background-color: #CBCBCB;
@@ -229,8 +229,70 @@ div.chat-button-area .chat-box-container {
     justify-content: center;
     align-items: center;
     flex-basis: 67%;
+    width: 50%;
 }
 
+/* ChatBox */
+div.chat-box {
+    display: flex;
+    flex-flow: column;
+    justify-content: flex-end;
+    width: 100%;
+    min-height: 50%;
+    padding: 0.2em;
+    overflow-y: auto;
+
+    background-color: #1C2A3F;
+    border: 1px solid rgba(0, 148, 255, 0.25);
+    box-shadow: 0 0 16px 8px rgb(0 148 255 / 25%);
+}
+div.chat-box div.messages-container {
+    display: flex;
+    flex-flow: column;
+}
+div.chat-box div.messages-container div.message {
+    font-family: "BankGothic", sans-serif;
+    border: 1px solid rgba(149, 149, 149, 0.5);
+    width: fit-content;
+    margin-bottom: 0.2em;
+    color: #E2E2E2;
+    padding: 0.1em;
+}
+div.chat-box div.messages-container div.message.player {
+    background-color: rgba(0, 87, 255, 0.25);
+}
+div.chat-box div.messages-container div.message.opponent {
+    background-color: rgba(255, 0, 0, 0.25);
+    align-self: flex-end;
+}
+div.chat-box div.controls-container {
+    display: flex;
+    flex-flow: row;
+    justify-content: space-between;
+}
+div.chat-box div.controls-container > input {
+    font-family: "BankGothic", sans-serif;
+    flex-basis: 88%;
+    background-color: #C4C4C4;
+    margin: 0;
+    border: 0;
+}
+div.chat-box div.controls-container div.button-container {
+    display: flex;
+    flex-flow: row;
+    flex-basis: 10%;
+}
+div.chat-box div.controls-container div.button-container div.chat-button {
+    font-family: "BankGothic", sans-serif;
+    display: flex;
+    flex-flow: row;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid rgba(149, 149, 149, 0.5);
+    background-color: rgba(31, 47, 71, 0.5);
+    flex-grow: 1;
+    color: #76BCAA;
+}
 
 
 /* CardZone */
