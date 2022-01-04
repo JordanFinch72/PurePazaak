@@ -20,10 +20,10 @@ export class CardZone extends React.Component
 			if(card)
 			{
 				let justPlayed = (this.props.cards[i+1] === undefined && card.type !== "turn");
-				cardComponents.push(<Card card={card} index={i} justPlayed={justPlayed} zone={"cardzone"} onCardClick={this.onCardClick} />);
+				cardComponents.push(<Card card={card} index={i} key={i} justPlayed={justPlayed} zone={"cardzone"} onCardClick={this.onCardClick} />);
 			}
 			else
-				cardComponents.push(<CardSlot />);
+				cardComponents.push(<CardSlot key={i} />);
 		}
 
 

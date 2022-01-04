@@ -150,6 +150,9 @@ export class Gameboard extends React.Component
 		delete hand[index];
 		cardZone.push(card);
 
+		console.log(currentPlayer + " is playing a card ("+index+"): ");
+		console.log(card);
+
 		// Re-compute round score
 		if(card.type === "special")
 		{
@@ -168,48 +171,64 @@ export class Gameboard extends React.Component
 				roundScore: roundScore
 			},
 			cardPlayed: index
-		}));
+		}), function(){
+			if(currentPlayer === "opponent" && this.state.opponent.isCPU)
+				this.endTurn();
+		});
 	}
 	endRound(roundWinner)
 	{
+		if(roundWinner !== "tie")
+		{
+			// Increment winner's round win counter
+			this.setState((prevState) => ({
+				[roundWinner]: {
+					...prevState[roundWinner],
+					roundCount: prevState[roundWinner].roundCount + 1
+				}
+			}), function()
+			{
+				// Detect if the winner has now won the game
+				if(this.state[roundWinner].roundCount === 3)
+				{
+					// TODO: Player wins
+					//  - Something will need to stop two human players from posting duplicate data to the back end on win/loss;
+					//  perhaps a unique entry in the database shared by both players so the result is only ever updated, not inserted
+
+					alert(roundWinner + " wins the game!");
+				}
+				else
+				{
+					alert(roundWinner + " wins the round!");
+					console.log(roundWinner + " wins the round!");
+				}
+			});
+		}
+		else
+		{
+			alert("It's a tie!");
+		}
+
+		/*// Clear card zones, alternate who gets first turn
+		let firstPlayer = (this.state.initialPlayer === "player") ? "opponent" : "player";
 		this.setState((prevState) => ({
-			[roundWinner]: {
-				...prevState[roundWinner],
-				roundCount: prevState[roundWinner].roundCount + 1
-			}
-		}), function(){
-			if(this.state[roundWinner].roundCount === 3)
-			{
-				// TODO: Player wins
-				//  - Something will need to stop two human players from posting duplicate data to the back end on win/loss;
-				//  perhaps a unique entry in the database shared by both players so the result is only ever updated, not inserted
+			player: {
+				...prevState.player,
+				cardZone: [],
+				roundScore: 0,
+				hasStood: false
+			},
+			opponent: {
+				...prevState.opponent,
+				cardZone: [],
+				roundScore: 0,
+				hasStood: false
+			},
+			initialPlayer: firstPlayer,
+			currentPlayer: firstPlayer
+		}), this.startTurn);*/
 
-				alert(roundWinner + " wins the game!");
-			}
-			else
-			{
-				alert(roundWinner + " wins the round!");
 
-				// Clear card zones, alternate who gets first turn
-				let firstPlayer = (this.state.initialPlayer === "player") ? "opponent" : "player";
-				this.setState((prevState) => ({
-					player: {
-						...prevState.player,
-						cardZone: [],
-						roundScore: 0,
-						hasStood: false
-					},
-					opponent: {
-						...prevState.opponent,
-						cardZone: [],
-						roundScore: 0,
-						hasStood: false
-					},
-					initialPlayer: firstPlayer,
-					currentPlayer: firstPlayer
-				}));
-			}
-		});
 	}
 	startTurn()
 	{
@@ -258,15 +277,15 @@ export class Gameboard extends React.Component
 		let currentPlayer = this.state.currentPlayer;
 		let nextPlayer = (currentPlayer === "player") ? "opponent" : "player";
 
-		console.log(currentPlayer);
-
-		if(this.detectWinner() || this.state[currentPlayer].roundScore === 20)
+		if(this.detectWinner() || this.state[currentPlayer].roundScore >= 20)
 		{
+			console.log(currentPlayer + " ended their turn but automatically stood");
 			// Override "END TURN" and stand instead
 			this.stand();
 		}
 		else
 		{
+			console.log(currentPlayer + " ended their turn");
 			// End turn, pass to opponent
 			this.setState({
 				currentPlayer: nextPlayer,    // Pass turn to opponent
@@ -278,20 +297,44 @@ export class Gameboard extends React.Component
 	{
 		let currentPlayer = this.state.currentPlayer;
 		let nextPlayer = (currentPlayer === "player") ? "opponent" : "player";
-		if(this.state[currentPlayer].roundScore > this.state[nextPlayer].roundScore && this.state[nextPlayer].hasStood)
+
+		let currentPlayerScore = this.state[currentPlayer].roundScore;
+		let currentPlayerStood = this.state[currentPlayer].hasStood;
+		let nextPlayerScore = this.state[nextPlayer].roundScore;
+		let nextPlayerStood = this.state[nextPlayer].hasStood;
+
+		if(currentPlayerScore > nextPlayerScore && nextPlayerStood && currentPlayerScore <= 20) // current exceeds next, next has stood
 		{
-			// Exceed score of other stood player
 			return currentPlayer;
 		}
-		else if(this.state[currentPlayer].roundScore > 20)
+		else if(nextPlayerScore > currentPlayerScore && currentPlayerStood  && nextPlayerScore <= 20) // next exceeds current, current has stood
 		{
-			// Going bust and standing is a loss
 			return nextPlayer;
 		}
-		else if(this.state[currentPlayer].roundScore <= 20 && this.state[currentPlayer].cardZone.length === 9)
+		else if(currentPlayerScore > 20 && currentPlayerStood) // current has gone bust and stood
 		{
-			// They win the round by fully populating their card zone without going bust; onto the next round
+			return nextPlayer;
+		}
+		else if(nextPlayerScore > 20 && nextPlayerStood) // next has gone bust and stood
+		{
 			return currentPlayer;
+		}
+		else if(currentPlayerScore <= 20 && this.state[currentPlayer].cardZone.length === 9) // current fully populates cardzone without going bust
+		{
+			return currentPlayer;
+		}
+		else if(nextPlayerScore <= 20 && this.state[nextPlayer].cardZone.length === 9) // current fully populates cardzone without going bust
+		{
+			return nextPlayer;
+		}
+		else if(currentPlayerStood && nextPlayerStood) // Both players are standing
+		{
+			if(currentPlayerScore > nextPlayerScore && currentPlayerScore <= 20) // current exceeds next's score
+				return currentPlayer;
+			else if(nextPlayerScore > currentPlayerScore && nextPlayerScore <= 20) // next exceeds current's score
+				return nextPlayer;
+			else if(currentPlayerScore === nextPlayerScore && currentPlayerScore <= 20 && nextPlayerScore <= 20) // current and next have equal scores, nobody bust
+				return "tie";
 		}
 	}
 	processCPUTurn()
@@ -303,7 +346,7 @@ export class Gameboard extends React.Component
 			// Stand, because they have beaten the other player's standing score
 			this.stand();
 		}
-		if(opponent.roundScore >= 14 && opponent.roundScore < 20)
+		else if(opponent.roundScore >= 14 && opponent.roundScore < 20)
 		{
 			// Play a + card to get to 20
 			let difference = 20 - opponent.roundScore;
@@ -313,7 +356,7 @@ export class Gameboard extends React.Component
 			else
 				this.endTurn();
 		}
-		if(opponent.roundScore === 18)
+		else if(opponent.roundScore === 18)
 		{
 			// Play +2
 			let cardIndex = this.hasCard("opponent", "positive", 2)
@@ -366,20 +409,26 @@ export class Gameboard extends React.Component
 	}
 	hasCard(player, type, value) // TODO: Consider moving as function of player/opponent states
 	{
-		for(let card in this.state[player].hand)
+		console.log(this.state[player].hand);
+		let result = false;
+		for(let i = 0; i < 4; ++i)
 		{
-			if(this.state[player].hand.hasOwnProperty(card))
+			if(this.state[player].hand[i] !== undefined && this.state[player].hand[i] !== null)
 			{
-				let index = card;
-				card = this.state[player].hand[card];
-				console.log("INDEX: " + index);
+				let card = this.state[player].hand[i];
+				let hasCard = (card.type === type && card.value === value)
+				console.log("LOOKING FOR " + type + " " + value);
+				console.log("HAS CARD?: " + hasCard);
 				console.log(card);
-				if(card.type === type && card.value === value)
-					return index;
-				else
-					return false; // JavaScript ftw
+				console.log("INDEX: " + i);
+				if(hasCard)
+				{
+					result = i;
+					break;
+				}
 			}
 		}
+		return result;
 	}
 	stand()
 	{
@@ -387,22 +436,26 @@ export class Gameboard extends React.Component
 		let currentPlayer = this.state.currentPlayer;
 		let nextPlayer = (currentPlayer === "player") ? "opponent" : "player";
 
-		// Detect round win/loss conditions
-		let winner = this.detectWinner();
-		if(winner)
-			this.endRound(winner);
-		else
-		{
-			// If player hasn't won or lost, then pass onto next player
-			this.setState((prevState) => ({
-				[currentPlayer]: {
-					...prevState[currentPlayer],
-					hasStood: true
-				},
-				currentPlayer: nextPlayer,    // Pass turn to opponent
-				cardPlayed: null,             // "Set" player's card zone
-			}), this.startTurn);              // Start next player's turn
-		}
+		console.log(currentPlayer + " has stood");
+
+		this.setState((prevState) => ({
+			[currentPlayer]: {
+				...prevState[currentPlayer],
+				hasStood: true
+			},
+			currentPlayer: nextPlayer,    // Pass turn to opponent
+			cardPlayed: null,             // "Set" player's card zone
+		}), function(){
+
+			// Detect round win/loss conditions
+			let winner = this.detectWinner();
+			if(winner)
+				this.endRound(winner);
+			else
+				this.startTurn();         // Start next player's turn
+		});
+
+
 	}
 	forfeitGame()
 	{

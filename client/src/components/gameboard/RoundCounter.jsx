@@ -14,9 +14,9 @@ export class RoundCounter extends React.Component
 		for(let i = 0; i < 3; ++i)
 		{
 			if(roundCount-- > 0)
-				pips.push(<div className={"pip full"}></div>);
+				pips.push(<div className={"pip full"} key={i}></div>);
 			else
-				pips.push(<div className={"pip"}></div>);
+				pips.push(<div className={"pip"} key={i}></div>);
 		}
 
 

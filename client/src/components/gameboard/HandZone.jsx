@@ -19,7 +19,7 @@ export class HandZone extends React.Component
 		{
 			let card = this.props.cards[i];
 			if(card)
-				cardComponents.push(<Card card={card} index={i} zone={"handzone"} onCardClick={this.onCardClick} onSwitchClick={this.onSwitchClick} isFaceDown={this.props.isFaceDown} />);
+				cardComponents.push(<Card card={card} index={i} key={i} zone={"handzone"} onCardClick={this.onCardClick} onSwitchClick={this.onSwitchClick} isFaceDown={this.props.isFaceDown} />);
 			else
 				cardComponents.push(<CardSlot />);
 		}
