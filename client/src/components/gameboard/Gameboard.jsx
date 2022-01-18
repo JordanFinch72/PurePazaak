@@ -38,12 +38,29 @@ export class Gameboard extends React.Component
 			},
 			initialPlayer: null, // The person who went first at beginning of round (for alternating first turns each round)
 			currentPlayer: null,
-			cardPlayed: null     // Hand index of card that has just been played
+			cardPlayed: null,    // Hand index of card that has just been played
+			messages: []
 		}
 
+		this.socket = new WebSocket("ws://localhost:80");
+
+		// TODO: While these are okay against the CPU, the server will need to manage the state of multiplayer games
+		//        and send the state via messages in a WebSocket.
 		this.onCardClick = this.onCardClick.bind(this);
 		this.onSwitchClick = this.onSwitchClick.bind(this);
 		this.onGameButtonClick = this.onGameButtonClick.bind(this);
+	}
+
+	componentDidMount()
+	{
+		console.log("Connecting...");
+
+		this.socket.onopen = () => {
+			console.log("Opened!");
+		}
+		this.socket.onmessage = ({data}) => {
+			console.log(data);
+		}
 	}
 
 
@@ -57,6 +74,9 @@ export class Gameboard extends React.Component
 	 */
 	onCardClick(card, index, zone)
 	{
+		console.log("Emitting...");
+		this.socket.send("Hello, card!");
+
 		if(this.state.currentPlayer === "player")
 		{
 			// Check if card has already been played
