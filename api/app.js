@@ -42,12 +42,21 @@ app.use(function(err, req, res, next)
 
 module.exports = app;
 
-/* WebSocket data */
+/* WebSocket Data */
 let allStates = {}; // Collection of game states (key: joinCode, value: state)
-let clients = [];   // Collection of all connected clients (array of {connection: <connection>, joinCode: <joinCode>}
 
 /* WebSocket Server */
-const webSocketServer = new ws.WebSocketServer({noServer: true});
+const webSocketServer = new ws.WebSocketServer({noServer: true, clientTracking: true});
+
+/**
+ * Allows WebSocketServer to broadcast messages to *all* clients, and not just the client that sent a message
+ * @param message The message to send back to *all* connected clients
+ */
+webSocketServer.broadcast = function(message)
+{
+	webSocketServer.clients.forEach(client => client.send(message));
+}
+
 webSocketServer.on("connection", function(socket)
 {
 	socket.on("message", function(message)
@@ -74,7 +83,7 @@ webSocketServer.on("connection", function(socket)
 						hasStood: false
 					},
 					opponent: {
-						username: "Opponent connecting...",
+						username: "Waiting for opponent",
 						deck: [],
 						hand: [],
 						cardZone: [],
@@ -101,8 +110,8 @@ webSocketServer.on("connection", function(socket)
 				};
 
 				// TODO: Add them to "opponent"; client can check for usernames to determine what should be shown
-				let response = {type: 'log', message: 'All players connected!'};
-				socket.send(JSON.stringify(response));
+				let response = {type: 'log', message: 'All players connected!', joinCode: joinCode};
+				webSocketServer.broadcast(JSON.stringify(response));
 			}
 		}
 		else if(message['type'] === 'chatMessage')
@@ -112,8 +121,8 @@ webSocketServer.on("connection", function(socket)
 		}
 
 		// All messages need to send the state back to the client
-		let response = {type: 'state', message: allStates[joinCode]};
-		socket.send(JSON.stringify(response));
+		let response = {type: 'state', message: allStates[joinCode], joinCode: joinCode};
+		webSocketServer.broadcast(JSON.stringify(response));
 	});
 });
 
