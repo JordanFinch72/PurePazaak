@@ -9,24 +9,13 @@ export class ChatBox extends React.Component
 		super(props);
 
 		this.state = {
-			// TODO: Dummy data. Hopefully this component can manage its own state instead of relying on Gameboard.
-			//   - WebSockets will be required!
-			messages: [
-				{sender: "player", content: "Hello, there!"},
-				{sender: "opponent", content: "General Kenobi!"},
-				{sender: "player", content: "I am a bold one!"}
-			],
 			messageBox: ""
 		}
 
-		this.onSendClick = this.onSendClick.bind(this);
+		this.onSendMessageClick = this.props.onSendMessageClick.bind(this);
 		this.onFieldChange = this.onFieldChange.bind(this);
 	}
 
-	onSendClick(e, message)
-	{
-		console.log(message);
-	}
 	onFieldChange(event)
 	{
 		const target = event.target;
@@ -41,8 +30,8 @@ export class ChatBox extends React.Component
 	render()
 	{
 		let messages = [];
-		this.state.messages.map((message, index) => {
-			messages.push(<Message message={message} key={index} />);
+		this.props.messages.map((message, index) => {
+			messages.unshift(<Message currentUser={this.props.currentUser} message={message} key={index} />); // It's done like this for scroll anchoring reasons
 		});
 
 		return(
@@ -53,7 +42,14 @@ export class ChatBox extends React.Component
 				<div className={"controls-container"}>
 					<input type={"text"} placeholder={"Type a message..."} name={"messageBox"} value={this.state.messageBox} onChange={this.onFieldChange} />
 					<div className={"button-container"}>
-						<ChatButton text={">"} handler={(e) => this.onSendClick(e, this.state.messageBox)} />
+						<ChatButton text={">"} handler={(e) => {
+							if(this.state.messageBox.length > 0)
+							{
+								let message = {message: this.state.messageBox};
+								this.onSendMessageClick(message);
+								this.setState({messageBox: ""})
+							}
+						}} />
 					</div>
 				</div>
 			</div>

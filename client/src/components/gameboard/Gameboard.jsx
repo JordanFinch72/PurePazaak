@@ -12,6 +12,7 @@ export class Gameboard extends React.Component
 	{
 		super(props);
 		this.state = {
+			// Default state for Singleplayer; default state for Multiplayer is returned by server
 			player: {
 				username: this.props.user.username,
 				deck: this.props.user.deck,
@@ -21,46 +22,30 @@ export class Gameboard extends React.Component
 				roundCount: 0,
 				hasStood: false
 			},
-			opponent: { // TODO: Dummy data
-				username: "The Champ",
-				deck: [
-					{type: "positive", value: 1},{type: "positive", value: 1},{type: "positive", value: 2},
-					{type: "negative", value: -2},{type: "positive", value: 3},{type: "positive", value: 3},
-					{type: "negative", value: -4},{type: "positive", value: 4},{type: "positive", value: 5},
-					{type: "negative", value: -6}
-				],
+			opponent: this.props.opponent || {
+				username: "Opponent",
+				deck: [],
 				hand: [],
 				cardZone: [],
 				roundScore: 0,
 				roundCount: 0,
-				hasStood: false,
-				isCPU: true
+				hasStood: false
 			},
 			initialPlayer: null, // The person who went first at beginning of round (for alternating first turns each round)
 			currentPlayer: null,
 			cardPlayed: null,    // Hand index of card that has just been played
-			messages: []
+			messages: [],
+			joinCode: this.props.joinCode // If null, then the player is playing a CPU
 		}
 
-		this.socket = new WebSocket("ws://localhost:80");
+		this.socket = new WebSocket("ws://localhost:80", "any-protocol");
 
 		// TODO: While these are okay against the CPU, the server will need to manage the state of multiplayer games
 		//        and send the state via messages in a WebSocket.
 		this.onCardClick = this.onCardClick.bind(this);
 		this.onSwitchClick = this.onSwitchClick.bind(this);
 		this.onGameButtonClick = this.onGameButtonClick.bind(this);
-	}
-
-	componentDidMount()
-	{
-		console.log("Connecting...");
-
-		this.socket.onopen = () => {
-			console.log("Opened!");
-		}
-		this.socket.onmessage = ({data}) => {
-			console.log(data);
-		}
+		this.onSendMessageClick = this.onSendMessageClick.bind(this);
 	}
 
 
@@ -77,46 +62,54 @@ export class Gameboard extends React.Component
 		console.log("Emitting...");
 		this.socket.send("Hello, card!");
 
-		if(this.state.currentPlayer === "player")
+		// Singleplayer
+		if(this.state.joinCode === null)
 		{
-			// Check if card has already been played
-			if(this.state.cardPlayed !== null)
+			if(this.state.currentPlayer === "player")
 			{
-				// Allow player to withdraw card (not in original game; played card will not be shown to opponent until they hit "END TURN" or "STAND")
-				if(zone === "cardzone" && card.type !== "turn")
+				// Check if card has already been played
+				if(this.state.cardPlayed !== null)
 				{
-					// Send card from CardZone to hand
-					let hand = this.state.player.hand;
-					let cardZone = this.state.player.cardZone;
-					let roundScore = this.state.player.roundScore;
-					cardZone.splice(index,1);
-					hand[this.state.cardPlayed] = card;
-
-					// Re-compute round score
-					if(card.type === "special")
+					// Allow player to withdraw card (not in original game; played card will not be shown to opponent until they hit "END TURN" or "STAND")
+					if(zone === "cardzone" && card.type !== "turn")
 					{
-						// TODO: Special card handling (probably easier just to reset the score to what it was at beginning of round, or use a calculateScore() function and call that)
-					}
-					else
-					{
-						roundScore -= card.value;
-					}
+						// Send card from CardZone to hand
+						let hand = this.state.player.hand;
+						let cardZone = this.state.player.cardZone;
+						let roundScore = this.state.player.roundScore;
+						cardZone.splice(index,1);
+						hand[this.state.cardPlayed] = card;
 
-					this.setState((prevState) => ({
-						player: {
-							...prevState.player,
-							hand: hand,
-							cardZone: cardZone,
-							roundScore: roundScore
-						},
-						cardPlayed: null
-					}));
+						// Re-compute round score
+						if(card.type === "special")
+						{
+							// TODO: Special card handling (probably easier just to reset the score to what it was at beginning of round, or use a calculateScore() function and call that)
+						}
+						else
+						{
+							roundScore -= card.value;
+						}
+
+						this.setState((prevState) => ({
+							player: {
+								...prevState.player,
+								hand: hand,
+								cardZone: cardZone,
+								roundScore: roundScore
+							},
+							cardPlayed: null
+						}));
+					}
+				}
+				else if(zone === "handzone")
+				{
+					this.playCard(index);
 				}
 			}
-			else if(zone === "handzone")
-			{
-				this.playCard(index);
-			}
+		}
+		else
+		{
+
 		}
 	}
 	onSwitchClick(playerType, card, index, mode)
@@ -135,7 +128,6 @@ export class Gameboard extends React.Component
 				hand: hand
 			}
 		}));
-
 	}
 
 	/**
@@ -161,373 +153,510 @@ export class Gameboard extends React.Component
 	/* Game function handlers */
 	playCard(index)
 	{
-		// Send card from hand to CardZone
-		let currentPlayer = this.state.currentPlayer;
-		let hand = this.state[currentPlayer].hand;
-		let card = this.state[currentPlayer].hand[index];
-		let cardZone = this.state[currentPlayer].cardZone;
-		let roundScore = this.state[currentPlayer].roundScore;
-		delete hand[index];
-		cardZone.push(card);
-
-		console.log(currentPlayer + " is playing a card ("+index+"): ");
-		console.log(card);
-
-		// Re-compute round score
-		if(card.type === "special")
+		// Singleplayer
+		if(this.state.joinCode === null)
 		{
-			// TODO: Special card handling
-		}
-		else
-		{
-			roundScore += card.value;
-		}
+			// Send card from hand to CardZone
+			let currentPlayer = this.state.currentPlayer;
+			let hand = this.state[currentPlayer].hand;
+			let card = this.state[currentPlayer].hand[index];
+			let cardZone = this.state[currentPlayer].cardZone;
+			let roundScore = this.state[currentPlayer].roundScore;
+			delete hand[index];
+			cardZone.push(card);
 
-		this.setState((prevState) => ({
-			[currentPlayer]: {
-				...prevState[currentPlayer],
-				hand: hand,
-				cardZone: cardZone,
-				roundScore: roundScore
-			},
-			cardPlayed: index
-		}), function(){
-			if(currentPlayer === "opponent" && this.state.opponent.isCPU)
-				this.endTurn();
-		});
-	}
-	endRound(roundWinner)
-	{
-		if(roundWinner !== "tie")
-		{
-			// Increment winner's round win counter
-			this.setState((prevState) => ({
-				[roundWinner]: {
-					...prevState[roundWinner],
-					roundCount: prevState[roundWinner].roundCount + 1
-				}
-			}), function()
+			console.log(currentPlayer + " is playing a card ("+index+"): ");
+			console.log(card);
+
+			// Re-compute round score
+			if(card.type === "special")
 			{
-				// Detect if the winner has now won the game
-				if(this.state[roundWinner].roundCount === 3)
-				{
-					// TODO: Player wins
-					//  - Something will need to stop two human players from posting duplicate data to the back end on win/loss;
-					//  perhaps a unique entry in the database shared by both players so the result is only ever updated, not inserted
-
-					alert(roundWinner + " wins the game!");
-				}
-				else
-				{
-					alert(roundWinner + " wins the round!");
-					console.log(roundWinner + " wins the round!");
-				}
-			});
-		}
-		else
-		{
-			alert("It's a tie!");
-		}
-
-		/*// Clear card zones, alternate who gets first turn
-		let firstPlayer = (this.state.initialPlayer === "player") ? "opponent" : "player";
-		this.setState((prevState) => ({
-			player: {
-				...prevState.player,
-				cardZone: [],
-				roundScore: 0,
-				hasStood: false
-			},
-			opponent: {
-				...prevState.opponent,
-				cardZone: [],
-				roundScore: 0,
-				hasStood: false
-			},
-			initialPlayer: firstPlayer,
-			currentPlayer: firstPlayer
-		}), this.startTurn);*/
-
-
-	}
-	startTurn()
-	{
-		let currentPlayer = this.state.currentPlayer;
-
-		// Check if player has stood (and therefore cannot take a turn until the end of round)
-		if(this.state[currentPlayer].hasStood)
-		{
-			let oppositePlayer = (currentPlayer === "player") ? "opponent" : "player";
-			if(this.state[oppositePlayer].hasStood)
-			{
-				// TODO: Both players have stood, so calculate result of the round
+				// TODO: Special card handling
 			}
 			else
 			{
-				// Skip player's turn, pass to next player
-				this.endTurn();
+				roundScore += card.value;
+			}
+
+			this.setState((prevState) => ({
+				[currentPlayer]: {
+					...prevState[currentPlayer],
+					hand: hand,
+					cardZone: cardZone,
+					roundScore: roundScore
+				},
+				cardPlayed: index
+			}), function(){
+				if(currentPlayer === "opponent" && this.state.opponent.isCPU)
+					this.endTurn();
+			});
+		}
+		else
+		{
+
+		}
+	}
+	endRound(roundWinner)
+	{
+		// Singleplayer
+		if(this.state.joinCode === null)
+		{
+			if(roundWinner !== "tie")
+			{
+				// Increment winner's round win counter
+				this.setState((prevState) => ({
+					[roundWinner]: {
+						...prevState[roundWinner],
+						roundCount: prevState[roundWinner].roundCount + 1
+					}
+				}), function()
+				{
+					// Detect if the winner has now won the game
+					if(this.state[roundWinner].roundCount === 3)
+					{
+						// TODO: Player wins
+						//  - Something will need to stop two human players from posting duplicate data to the back end on win/loss;
+						//  perhaps a unique entry in the database shared by both players so the result is only ever updated, not inserted
+
+						alert(roundWinner + " wins the game!");
+					}
+					else
+					{
+						alert(roundWinner + " wins the round!");
+						console.log(roundWinner + " wins the round!");
+					}
+				});
+			}
+			else
+			{
+				alert("It's a tie!");
+			}
+
+			/*// Clear card zones, alternate who gets first turn
+			 let firstPlayer = (this.state.initialPlayer === "player") ? "opponent" : "player";
+			 this.setState((prevState) => ({
+			 player: {
+			 ...prevState.player,
+			 cardZone: [],
+			 roundScore: 0,
+			 hasStood: false
+			 },
+			 opponent: {
+			 ...prevState.opponent,
+			 cardZone: [],
+			 roundScore: 0,
+			 hasStood: false
+			 },
+			 initialPlayer: firstPlayer,
+			 currentPlayer: firstPlayer
+			 }), this.startTurn);*/
+		}
+		else
+		{
+
+		}
+	}
+	startTurn()
+	{
+		// Singleplayer
+		if(this.state.joinCode === null)
+		{
+			let currentPlayer = this.state.currentPlayer;
+
+			// Check if player has stood (and therefore cannot take a turn until the end of round)
+			if(this.state[currentPlayer].hasStood)
+			{
+				let oppositePlayer = (currentPlayer === "player") ? "opponent" : "player";
+				if(this.state[oppositePlayer].hasStood)
+				{
+					// TODO: Both players have stood, so calculate result of the round
+				}
+				else
+				{
+					// Skip player's turn, pass to next player
+					this.endTurn();
+				}
+			}
+			else
+			{
+				// Draw turn card from the game deck (evenly distributed deck of infinite cards, so no need for an array)
+				let cardValue = this.rand(1, 10);
+
+				// Add card to current player's card zone
+				let cardZone = this.state[currentPlayer].cardZone;
+				cardZone.push({type: "turn", value: cardValue});
+
+				let roundScore = this.state[currentPlayer].roundScore; // TODO: 20 = automatic stand
+				this.setState((prevState) => ({
+					[currentPlayer]: {
+						...prevState[currentPlayer],
+						cardZone: cardZone,
+						roundScore: prevState[currentPlayer].roundScore + cardValue
+					}
+				}), function(){
+					if(this.state[currentPlayer].isCPU)
+					{
+						this.processCPUTurn();
+					}
+				});
 			}
 		}
 		else
 		{
-			// Draw turn card from the game deck (evenly distributed deck of infinite cards, so no need for an array)
-			let cardValue = this.rand(1, 10);
 
-			// Add card to current player's card zone
-			let cardZone = this.state[currentPlayer].cardZone;
-			cardZone.push({type: "turn", value: cardValue});
-
-			let roundScore = this.state[currentPlayer].roundScore; // TODO: 20 = automatic stand
-			this.setState((prevState) => ({
-				[currentPlayer]: {
-					...prevState[currentPlayer],
-					cardZone: cardZone,
-					roundScore: prevState[currentPlayer].roundScore + cardValue
-				}
-			}), function(){
-				if(this.state[currentPlayer].isCPU)
-				{
-					this.processCPUTurn();
-				}
-			});
 		}
+
+
 	}
 	endTurn()
 	{
-		let currentPlayer = this.state.currentPlayer;
-		let nextPlayer = (currentPlayer === "player") ? "opponent" : "player";
-
-		if(this.detectWinner() || this.state[currentPlayer].roundScore >= 20)
+		// Singleplayer
+		if(this.state.joinCode === null)
 		{
-			console.log(currentPlayer + " ended their turn but automatically stood");
-			// Override "END TURN" and stand instead
-			this.stand();
+			let currentPlayer = this.state.currentPlayer;
+			let nextPlayer = (currentPlayer === "player") ? "opponent" : "player";
+
+			if(this.detectWinner() || this.state[currentPlayer].roundScore >= 20)
+			{
+				console.log(currentPlayer + " ended their turn but automatically stood");
+				// Override "END TURN" and stand instead
+				this.stand();
+			}
+			else
+			{
+				console.log(currentPlayer + " ended their turn");
+				// End turn, pass to opponent
+				this.setState({
+					currentPlayer: nextPlayer,    // Pass turn to opponent
+					cardPlayed: null              // "Set" player's card zone
+				}, this.startTurn);               // Start next player's turn
+			}
 		}
 		else
 		{
-			console.log(currentPlayer + " ended their turn");
-			// End turn, pass to opponent
-			this.setState({
-				currentPlayer: nextPlayer,    // Pass turn to opponent
-				cardPlayed: null              // "Set" player's card zone
-			}, this.startTurn);               // Start next player's turn
+
 		}
+
+
 	}
 	detectWinner()
 	{
-		let currentPlayer = this.state.currentPlayer;
-		let nextPlayer = (currentPlayer === "player") ? "opponent" : "player";
+		// Singleplayer
+		if(this.state.joinCode === null)
+		{
+			let currentPlayer = this.state.currentPlayer;
+			let nextPlayer = (currentPlayer === "player") ? "opponent" : "player";
 
-		let currentPlayerScore = this.state[currentPlayer].roundScore;
-		let currentPlayerStood = this.state[currentPlayer].hasStood;
-		let nextPlayerScore = this.state[nextPlayer].roundScore;
-		let nextPlayerStood = this.state[nextPlayer].hasStood;
+			let currentPlayerScore = this.state[currentPlayer].roundScore;
+			let currentPlayerStood = this.state[currentPlayer].hasStood;
+			let nextPlayerScore = this.state[nextPlayer].roundScore;
+			let nextPlayerStood = this.state[nextPlayer].hasStood;
 
-		if(currentPlayerScore > nextPlayerScore && nextPlayerStood && currentPlayerScore <= 20) // current exceeds next, next has stood
-		{
-			return currentPlayer;
-		}
-		else if(nextPlayerScore > currentPlayerScore && currentPlayerStood  && nextPlayerScore <= 20) // next exceeds current, current has stood
-		{
-			return nextPlayer;
-		}
-		else if(currentPlayerScore > 20 && currentPlayerStood) // current has gone bust and stood
-		{
-			return nextPlayer;
-		}
-		else if(nextPlayerScore > 20 && nextPlayerStood) // next has gone bust and stood
-		{
-			return currentPlayer;
-		}
-		else if(currentPlayerScore <= 20 && this.state[currentPlayer].cardZone.length === 9) // current fully populates cardzone without going bust
-		{
-			return currentPlayer;
-		}
-		else if(nextPlayerScore <= 20 && this.state[nextPlayer].cardZone.length === 9) // current fully populates cardzone without going bust
-		{
-			return nextPlayer;
-		}
-		else if(currentPlayerStood && nextPlayerStood) // Both players are standing
-		{
-			if(currentPlayerScore > nextPlayerScore && currentPlayerScore <= 20) // current exceeds next's score
+			if(currentPlayerScore > nextPlayerScore && nextPlayerStood && currentPlayerScore <= 20) // current exceeds next, next has stood
+			{
 				return currentPlayer;
-			else if(nextPlayerScore > currentPlayerScore && nextPlayerScore <= 20) // next exceeds current's score
+			}
+			else if(nextPlayerScore > currentPlayerScore && currentPlayerStood  && nextPlayerScore <= 20) // next exceeds current, current has stood
+			{
 				return nextPlayer;
-			else if(currentPlayerScore === nextPlayerScore && currentPlayerScore <= 20 && nextPlayerScore <= 20) // current and next have equal scores, nobody bust
-				return "tie";
+			}
+			else if(currentPlayerScore > 20 && currentPlayerStood) // current has gone bust and stood
+			{
+				return nextPlayer;
+			}
+			else if(nextPlayerScore > 20 && nextPlayerStood) // next has gone bust and stood
+			{
+				return currentPlayer;
+			}
+			else if(currentPlayerScore <= 20 && this.state[currentPlayer].cardZone.length === 9) // current fully populates cardzone without going bust
+			{
+				return currentPlayer;
+			}
+			else if(nextPlayerScore <= 20 && this.state[nextPlayer].cardZone.length === 9) // current fully populates cardzone without going bust
+			{
+				return nextPlayer;
+			}
+			else if(currentPlayerStood && nextPlayerStood) // Both players are standing
+			{
+				if(currentPlayerScore > nextPlayerScore && currentPlayerScore <= 20) // current exceeds next's score
+					return currentPlayer;
+				else if(nextPlayerScore > currentPlayerScore && nextPlayerScore <= 20) // next exceeds current's score
+					return nextPlayer;
+				else if(currentPlayerScore === nextPlayerScore && currentPlayerScore <= 20 && nextPlayerScore <= 20) // current and next have equal scores, nobody bust
+					return "tie";
+			}
+		}
+		else
+		{
+
 		}
 	}
 	processCPUTurn()
 	{
-		// Determine best move (rudimentary; can expand decision-making logic later)
-		let opponent = this.state.opponent;
-		if(opponent.roundScore > this.state.player.roundScore && this.state.player.hasStood)
+		// Singleplayer
+		if(this.state.joinCode === null)
 		{
-			// Stand, because they have beaten the other player's standing score
-			this.stand();
-		}
-		else if(opponent.roundScore >= 14 && opponent.roundScore < 20)
-		{
-			// Play a + card to get to 20
-			let difference = 20 - opponent.roundScore;
-			let cardIndex = this.hasCard("opponent", "positive", difference);
-			if(cardIndex !== false)
-				this.playCard(cardIndex);
-			else
-				this.endTurn();
-		}
-		else if(opponent.roundScore === 18)
-		{
-			// Play +2
-			let cardIndex = this.hasCard("opponent", "positive", 2)
-			if(cardIndex !== false)
-				this.playCard(cardIndex);
-			else
+			// Determine best move (rudimentary; can expand decision-making logic later)
+			let opponent = this.state.opponent;
+			if(opponent.roundScore > this.state.player.roundScore && this.state.player.hasStood)
+			{
+				// Stand, because they have beaten the other player's standing score
 				this.stand();
-		}
-		else if(opponent.roundScore === 19)
-		{
-			// Play +1
-			let cardIndex = this.hasCard("opponent", "positive", 2)
-			if(cardIndex !== false)
-				this.playCard(cardIndex);
-			else
+			}
+			else if(opponent.roundScore >= 14 && opponent.roundScore < 20)
+			{
+				// Play a + card to get to 20
+				let difference = 20 - opponent.roundScore;
+				let cardIndex = this.hasCard("opponent", "positive", difference);
+				if(cardIndex !== false)
+					this.playCard(cardIndex);
+				else
+					this.endTurn();
+			}
+			else if(opponent.roundScore === 18)
+			{
+				// Play +2
+				let cardIndex = this.hasCard("opponent", "positive", 2)
+				if(cardIndex !== false)
+					this.playCard(cardIndex);
+				else
+					this.stand();
+			}
+			else if(opponent.roundScore === 19)
+			{
+				// Play +1
+				let cardIndex = this.hasCard("opponent", "positive", 2)
+				if(cardIndex !== false)
+					this.playCard(cardIndex);
+				else
+					this.stand();
+			}
+			else if(opponent.roundScore === 20)
+			{
+				// Stand, as 20 is the best score
 				this.stand();
-		}
-		else if(opponent.roundScore === 20)
-		{
-			// Stand, as 20 is the best score
-			this.stand();
-		}
-		else if(opponent.roundScore > 20 && opponent.roundScore <= 26)
-		{
-			// Find a negative card that can bring them to 20 or less
-			let difference = opponent.roundScore - 20;
-			let cardIndex;
+			}
+			else if(opponent.roundScore > 20 && opponent.roundScore <= 26)
+			{
+				// Find a negative card that can bring them to 20 or less
+				let difference = opponent.roundScore - 20;
+				let cardIndex;
 
-			for(let i = 0; i < (6-difference); ++i) // e.g. score = 23, difference = 3, search for -3 to -6
-			{
-				cardIndex = this.hasCard("opponent", "negative", -(difference+i));
-				if(cardIndex !== false) break;
+				for(let i = 0; i < (6-difference); ++i) // e.g. score = 23, difference = 3, search for -3 to -6
+				{
+					cardIndex = this.hasCard("opponent", "negative", -(difference+i));
+					if(cardIndex !== false) break;
+				}
+				if(cardIndex !== false)
+					this.playCard(cardIndex);
+				else
+				{
+					this.stand();
+				}
 			}
-			if(cardIndex !== false)
-				this.playCard(cardIndex);
-			else
+			else if(opponent.roundScore >= 27)
 			{
+				// Stand, as they cannot be saved (except by special cards, to be implemented later)
 				this.stand();
 			}
-		}
-		else if(opponent.roundScore >= 27)
-		{
-			// Stand, as they cannot be saved (except by special cards, to be implemented later)
-			this.stand();
+			else
+			{
+				this.endTurn(); // Do nothing; wait for next card to be drawn
+			}
 		}
 		else
 		{
-			this.endTurn(); // Do nothing; wait for next card to be drawn
+
 		}
 	}
 	hasCard(player, type, value) // TODO: Consider moving as function of player/opponent states
 	{
-		console.log(this.state[player].hand);
-		let result = false;
-		for(let i = 0; i < 4; ++i)
+		// Singleplayer
+		if(this.state.joinCode === null)
 		{
-			if(this.state[player].hand[i] !== undefined && this.state[player].hand[i] !== null)
+			console.log(this.state[player].hand);
+			let result = false;
+			for(let i = 0; i < 4; ++i)
 			{
-				let card = this.state[player].hand[i];
-				let hasCard = (card.type === type && card.value === value)
-				console.log("LOOKING FOR " + type + " " + value);
-				console.log("HAS CARD?: " + hasCard);
-				console.log(card);
-				console.log("INDEX: " + i);
-				if(hasCard)
+				if(this.state[player].hand[i] !== undefined && this.state[player].hand[i] !== null)
 				{
-					result = i;
-					break;
+					let card = this.state[player].hand[i];
+					let hasCard = (card.type === type && card.value === value)
+					console.log("LOOKING FOR " + type + " " + value);
+					console.log("HAS CARD?: " + hasCard);
+					console.log(card);
+					console.log("INDEX: " + i);
+					if(hasCard)
+					{
+						result = i;
+						break;
+					}
 				}
 			}
+			return result;
 		}
-		return result;
+		else
+		{
+
+		}
 	}
 	stand()
 	{
-		// End turn, set variable to prevent player from getting another turn
-		let currentPlayer = this.state.currentPlayer;
-		let nextPlayer = (currentPlayer === "player") ? "opponent" : "player";
+		// Singleplayer
+		if(this.state.joinCode === null)
+		{
+			// End turn, set variable to prevent player from getting another turn
+			let currentPlayer = this.state.currentPlayer;
+			let nextPlayer = (currentPlayer === "player") ? "opponent" : "player";
 
-		console.log(currentPlayer + " has stood");
+			console.log(currentPlayer + " has stood");
 
-		this.setState((prevState) => ({
-			[currentPlayer]: {
-				...prevState[currentPlayer],
-				hasStood: true
-			},
-			currentPlayer: nextPlayer,    // Pass turn to opponent
-			cardPlayed: null,             // "Set" player's card zone
-		}), function(){
+			this.setState((prevState) => ({
+				[currentPlayer]: {
+					...prevState[currentPlayer],
+					hasStood: true
+				},
+				currentPlayer: nextPlayer,    // Pass turn to opponent
+				cardPlayed: null,             // "Set" player's card zone
+			}), function(){
 
-			// Detect round win/loss conditions
-			let winner = this.detectWinner();
-			if(winner)
-				this.endRound(winner);
-			else
-				this.startTurn();         // Start next player's turn
-		});
+				// Detect round win/loss conditions
+				let winner = this.detectWinner();
+				if(winner)
+					this.endRound(winner);
+				else
+					this.startTurn();         // Start next player's turn
+			});
+		}
+		else
+		{
 
-
+		}
 	}
 	forfeitGame()
 	{
-		// Player loses the game; opponent wins the game
+		// Singleplayer
+		if(this.state.joinCode === null)
+		{
+			// Player loses the game; opponent wins the game
+		}
+		else
+		{
+
+		}
+	}
+	initialiseGame()
+	{
+		alert("initialising");
+		// Singleplayer
+		if(this.state.joinCode === null)
+		{
+			let playerDeck = this.state.player.deck, opponentDeck = this.state.opponent.deck;
+			let playerHand = [], opponentHand = [];
+
+			// Shuffle deck, draw hands
+			for(let i = 0; i < 500; ++i)
+			{
+				let card1 = this.rand(0, 9);
+				let card2 = this.rand(0, 9);
+				[playerDeck[card1], playerDeck[card2]] = [playerDeck[card2], playerDeck[card1]]; // Swap
+
+				card1 = this.rand(0, 9);
+				card2 = this.rand(0, 9);
+				[opponentDeck[card1], opponentDeck[card2]] = [opponentDeck[card2], opponentDeck[card1]];
+			}
+			for(let i = 0; i < 4; ++i)
+			{
+				playerHand.push(playerDeck.pop());
+				opponentHand.push(opponentDeck.pop());
+			}
+
+			// Determine first player
+			let toss = this.rand(0, 1);
+			let firstPlayer = (toss === 0) ? "player" : "opponent";
+
+			this.setState((prevState) => ({
+				player: {
+					...prevState.player,
+					hand: playerHand
+				},
+				opponent: {
+					...prevState.opponent,
+					hand: opponentHand
+				},
+				initialPlayer: firstPlayer,
+				currentPlayer: firstPlayer
+			}), this.startTurn);
+		}
+		else
+		{
+
+		}
+	}
+	onSendMessageClick(message)
+	{
+		// Singleplayer
+		if(this.state.joinCode === null)
+		{
+			let messages = this.state.messages;
+			messages.push(message); // Bit weird talking to a CPU but okay
+		}
+		else
+		{
+			message.sender = this.getPlayerType(this.props.user.username);
+			let socketMessage = {type: 'chatMessage', chatMessage: message, joinCode: this.state.joinCode};
+			this.socket.send(JSON.stringify(socketMessage));
+		}
 	}
 
 	componentWillMount()
 	{
-		let playerDeck = this.state.player.deck, opponentDeck = this.state.opponent.deck;
-		let playerHand = [], opponentHand = [];
-
-		// Shuffle deck, draw hands
-		for(let i = 0; i < 500; ++i)
+		// Singleplayer
+		if(this.state.joinCode === null)
 		{
-			let card1 = this.rand(0, 9);
-			let card2 = this.rand(0, 9);
-			[playerDeck[card1], playerDeck[card2]] = [playerDeck[card2], playerDeck[card1]]; // Swap
-
-			card1 = this.rand(0, 9);
-			card2 = this.rand(0, 9);
-			[opponentDeck[card1], opponentDeck[card2]] = [opponentDeck[card2], opponentDeck[card1]];
+			this.initialiseGame();
 		}
-		for(let i = 0; i < 4; ++i)
+		else
 		{
-			playerHand.push(playerDeck.pop());
-			opponentHand.push(opponentDeck.pop());
+			// Tell multiplayer game creator the join code
+			console.log("Connecting...");
+			this.socket.onopen = () => {
+				console.log("Opened! Sending join code to server...");
+				let message = {type: 'connectionData', joinCode: this.state.joinCode, user: this.props.user}
+				this.socket.send(JSON.stringify(message));
+			}
+			this.socket.onmessage = (response) => {
+				response = JSON.parse(response.data);
+				console.log(response);
+
+				if(response.type === "state")
+				{
+					this.setState(response.message);
+				}
+				else if(response.type === "log")
+				{
+					console.log(response);
+					if(response.message === "All players connected!")
+					{
+						this.initialiseGame();
+					}
+				}
+			}
 		}
-
-		// Determine first player
-		let toss = this.rand(0, 1);
-		let firstPlayer = (toss === 0) ? "player" : "opponent";
-
-		this.setState((prevState) => ({
-			player: {
-				...prevState.player,
-				hand: playerHand
-			},
-			opponent: {
-				...prevState.opponent,
-				hand: opponentHand
-			},
-			initialPlayer: firstPlayer,
-			currentPlayer: firstPlayer
-		}), this.startTurn);
 	}
 
+	/**
+	 * For multiplayer sessions, this function is useful for returning whether the specified user is the "player" or the "opponent" (left or right side)
+	 * @param name
+	 */
+	getPlayerType(name)
+	{
+		return (name === this.state.player.username) ? "player" : "opponent"
+	}
 	rand(min, max)
 	{
 		return Math.floor(Math.random() * (max - min + 1) ) + min;
 	}
-
-
 
 	render()
 	{
@@ -551,7 +680,8 @@ export class Gameboard extends React.Component
 				</div>
 				<div className={"third-container chat-button-area"}>
 					<div className={"chat-box-container"}>
-						<ChatBox users={[this.state.player.username, this.state.opponent.username]} />
+						<ChatBox currentUser={this.props.user} users={[this.state.player.username, this.state.opponent.username]} messages={this.state.messages}
+						         onSendMessageClick={this.onSendMessageClick}/>
 					</div>
 					<div className={"button-container"}>
 						<Button text={"END TURN"} handler={() => this.onGameButtonClick("END TURN")} />

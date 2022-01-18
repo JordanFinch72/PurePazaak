@@ -42,8 +42,10 @@ app.use(function(err, req, res, next)
 
 module.exports = app;
 
-/* Default game state */
-let allStates = {};
+/* WebSocket data */
+let allStates = {}; // Collection of game states (key: joinCode, value: state)
+let clients = [];   // Collection of all connected clients (array of {connection: <connection>, joinCode: <joinCode>}
+
 /* WebSocket Server */
 const webSocketServer = new ws.WebSocketServer({noServer: true});
 webSocketServer.on("connection", function(socket)
@@ -53,57 +55,65 @@ webSocketServer.on("connection", function(socket)
 		// Parse the message
 		message = JSON.parse(message);
 		let joinCode = message['joinCode'];
-		if(message['type'] === 'createGame')
-		{
-			// Player will have automatically been redirected to the game
-			// Note: Might have to wait for server to finish updating the allStates first before redirecting?
-			allStates[joinCode] = { // Default game state
-				player: {
-					username: null,
-					deck: [],
-					hand: [],
-					cardZone: [],
-					roundScore: 0,
-					roundCount: 0,
-					hasStood: false
-				},
-				opponent: {
-					username: null,
-					deck: [],
-					hand: [],
-					cardZone: [],
-					roundScore: 0,
-					roundCount: 0,
-					hasStood: false
-				},
-				initialPlayer: null, // The person who went first at beginning of round (for alternating first turns each round)
-				currentPlayer: null,
-				cardPlayed: null,     // Hand index of card that has just been played
-				messages: []
-			};
-		}
-		else if(message['type'] === 'connectionData')
-		{
-			let playerNumber = message['playerNumber'];
 
-			if(allStates[joinCode] === undefined || allStates[joinCode] === null)
+		if(message['type'] === 'connectionData')
+		{
+			let player = message['user']; // First one to join is the "player"
+			if(allStates[joinCode] === undefined || allStates[joinCode] === null) // Game doesn't yet exist
 			{
-				// Game does not exist // TODO: Make sure joinCode key is created when game is created
+				// Player will have automatically been redirected to the game
+				// Note: Might have to wait for server to finish updating the allStates first before redirecting?
+				allStates[joinCode] = { // Default game state
+					player: {
+						username: player.username,
+						deck: player.deck,
+						hand: [],
+						cardZone: [],
+						roundScore: 0,
+						roundCount: 0,
+						hasStood: false
+					},
+					opponent: {
+						username: "Opponent connecting...",
+						deck: [],
+						hand: [],
+						cardZone: [],
+						roundScore: 0,
+						roundCount: 0,
+						hasStood: false
+					},
+					initialPlayer: null, // The person who went first at beginning of round (for alternating first turns each round)
+					currentPlayer: null,
+					cardPlayed: null,    // Hand index of card that has just been played
+					messages: [{message: joinCode, sender: "player"}]
+				};
 			}
 			else // Second player has joined
 			{
-				let response = {type: 'response', message: 'All players connected!'};
+				let opponent = message['user']; // Second one to join is the "opponent"
+				allStates[joinCode] = {
+					...allStates[joinCode],
+					opponent: {
+						...allStates[joinCode].opponent,
+						username: opponent.username,
+						deck: opponent.deck
+					}
+				};
+
+				// TODO: Add them to "opponent"; client can check for usernames to determine what should be shown
+				let response = {type: 'log', message: 'All players connected!'};
 				socket.send(JSON.stringify(response));
 			}
 		}
 		else if(message['type'] === 'chatMessage')
 		{
-			let chatMessage = message['chatMessage'];
-			allStates[joinCode].messages.push(chatMessage); // e.g. {sender: "player", content: "Hello, there!"} or {sender: "opponent", content: "General Kenobi!"}
+			let chatMessage = message['chatMessage']; // e.g. {sender: "player", message: "Hello, there!"} or {sender: "opponent", message: "General Kenobi!"}
+			allStates[joinCode].messages.push(chatMessage);
 		}
 
 		// All messages need to send the state back to the client
-		socket.send(JSON.stringify(allStates[joinCode]));
+		let response = {type: 'state', message: allStates[joinCode]};
+		socket.send(JSON.stringify(response));
 	});
 });
 

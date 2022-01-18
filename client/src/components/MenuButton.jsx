@@ -5,14 +5,21 @@ export class MenuButton extends React.Component
 	constructor(props)
 	{
 		super(props);
+		this.state = {
+			handler: this.props.handler.bind(this),
+			text: this.props.text
+		}
+	}
 
-		this.handler = this.props.handler.bind(this);
+	componentWillUnmount()
+	{
+		this.setState({handler: null, text: null});
 	}
 
 	render()
 	{
 		return(
-			<div className={"menu-button"} onClick={this.handler}>{this.props.text}</div>
+			<div className={"menu-button"} onClick={this.state.handler}>{this.state.text}</div>
 		)
 	}
 }

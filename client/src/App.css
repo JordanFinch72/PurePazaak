@@ -246,8 +246,8 @@ div.chat-box {
     justify-content: flex-end;
     width: 100%;
     min-height: 50%;
+    height: 50%;
     padding: 0.2em;
-    overflow-y: auto;
 
     background-color: #1C2A3F;
     border: 1px solid rgba(0, 148, 255, 0.25);
@@ -255,7 +255,8 @@ div.chat-box {
 }
 div.chat-box div.messages-container {
     display: flex;
-    flex-flow: column;
+    flex-flow: column-reverse; /* For overflow scroll anchoring reasons */
+    overflow-y: auto;
 }
 div.chat-box div.messages-container div.message {
     border: 1px solid rgba(149, 149, 149, 0.5);

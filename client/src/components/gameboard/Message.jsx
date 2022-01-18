@@ -11,7 +11,7 @@ export class Message extends React.Component
 	{
 		return(
 			<div className={"message " + this.props.message.sender}>
-				{this.props.message.content}
+				{this.props.message.message}
 			</div>
 		)
 	}

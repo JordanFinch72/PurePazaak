@@ -5,6 +5,9 @@ export class Menu extends React.Component
 	constructor(props)
 	{
 		super(props);
+		this.state = {
+			menuButtons: this.props.menuButtons
+		}
 	}
 
 	render()
@@ -12,7 +15,7 @@ export class Menu extends React.Component
 
 		return(
 			<div className={"main-menu"}>
-				{this.props.menuButtons}
+				{this.state.menuButtons}
 			</div>
 		)
 	}
