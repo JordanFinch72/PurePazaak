@@ -627,22 +627,19 @@ export class Gameboard extends React.Component
 			}
 			this.socket.onmessage = (response) => {
 				response = JSON.parse(response.data);
-				if(response.joinCode === this.state.joinCode) // WebSocket broadcasts; this pays attention only to messages intended for this game
-				{
-					console.log(response);
+				console.log(response);
 
-					if(response.type === "state")
+				if(response.type === "state")
+				{
+					this.setState(response.message);
+				}
+				else if(response.type === "log")
+				{
+					console.log("SOCKET LOG:");
+					console.log(response.message);
+					if(response.message === "All players connected!")
 					{
-						this.setState(response.message);
-					}
-					else if(response.type === "log")
-					{
-						console.log("SOCKET LOG:");
-						console.log(response.message);
-						if(response.message === "All players connected!")
-						{
-							this.initialiseGame();
-						}
+						this.initialiseGame();
 					}
 				}
 

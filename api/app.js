@@ -49,12 +49,16 @@ let allStates = {}; // Collection of game states (key: joinCode, value: state)
 const webSocketServer = new ws.WebSocketServer({noServer: true, clientTracking: true});
 
 /**
- * Allows WebSocketServer to broadcast messages to *all* clients, and not just the client that sent a message
- * @param message The message to send back to *all* connected clients
+ * Allows WebSocketServer to broadcast messages to multiple clients, and not just the client that sent a message
+ * @param message The message to send back to connected clients
+ * @param joinCode The joinCode of the clients to receive the broadcast
  */
-webSocketServer.broadcast = function(message)
+webSocketServer.broadcast = function(message, joinCode)
 {
-	webSocketServer.clients.forEach(client => client.send(message));
+	webSocketServer.clients.forEach((client) => {
+		if(Number(client.joinCode) === Number(joinCode)) // Required as data types get mismatched by WebSocket
+			client.send(JSON.stringify(message));                // Send only to clients who share joinCodes
+	});
 }
 
 webSocketServer.on("connection", function(socket)
@@ -64,6 +68,12 @@ webSocketServer.on("connection", function(socket)
 		// Parse the message
 		message = JSON.parse(message);
 		let joinCode = message['joinCode'];
+
+		// Add joinCode to client data to prevent broadcasts from affecting all players
+		webSocketServer.clients.forEach((client) => {
+			if(client === socket)
+				client.joinCode = joinCode;
+		});
 
 		if(message['type'] === 'connectionData')
 		{
@@ -110,8 +120,8 @@ webSocketServer.on("connection", function(socket)
 				};
 
 				// TODO: Add them to "opponent"; client can check for usernames to determine what should be shown
-				let response = {type: 'log', message: 'All players connected!', joinCode: joinCode};
-				webSocketServer.broadcast(JSON.stringify(response));
+				let response = {type: 'log', message: 'All players connected!'};
+				webSocketServer.broadcast(response, joinCode);
 			}
 		}
 		else if(message['type'] === 'chatMessage')
@@ -121,12 +131,12 @@ webSocketServer.on("connection", function(socket)
 		}
 
 		// All messages need to send the state back to the client
-		let response = {type: 'state', message: allStates[joinCode], joinCode: joinCode};
-		webSocketServer.broadcast(JSON.stringify(response));
+		let response = {type: 'state', message: allStates[joinCode]};
+		webSocketServer.broadcast(response, joinCode);
 	});
 });
 
-// Converts the connection to a WebSocket
+// Upgrades the connection to a WebSocket
 const server = app.listen(80);
 server.on("upgrade", (request, socket, head) =>
 {
