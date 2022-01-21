@@ -23,17 +23,19 @@ export class Card extends React.Component
 		}
 
 		let justPlayed = (this.props.justPlayed) ? " just-played" : "";
+		let isFaceDown = (this.props.isFaceDown) ? " facedown" : "";
 		return(
 			<div className={"card" + justPlayed} onClick={(e) => {
-				this.onCardClick({type: type, value: this.props.card.value}, this.props.index, this.props.zone);
+				if(!this.props.isFaceDown)
+					this.onCardClick({type: type, value: this.props.card.value}, this.props.index, this.props.zone);
 			}}>
-				<div className={"upper-box " + type}>
+				<div className={"upper-box " + type + isFaceDown}>
 					<div className={"value-box"}>
-						{this.props.card.value}
+						{(this.props.isFaceDown) ? "" : this.props.card.value}
 					</div>
 				</div>
-				<div className={"lower-box " + type}>
-					{lowerBoxItems}
+				<div className={"lower-box " + type + isFaceDown}>
+					{(this.props.isFaceDown) ? "" : lowerBoxItems}
 				</div>
 			</div>
 		)

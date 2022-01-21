@@ -68,6 +68,7 @@ webSocketServer.on("connection", function(socket)
 		// Parse the message
 		message = JSON.parse(message);
 		let joinCode = message['joinCode'];
+		let sendState = true;
 
 		// Add joinCode to client data to prevent broadcasts from affecting all players
 		webSocketServer.clients.forEach((client) => {
@@ -104,7 +105,8 @@ webSocketServer.on("connection", function(socket)
 					initialPlayer: null, // The person who went first at beginning of round (for alternating first turns each round)
 					currentPlayer: null,
 					cardPlayed: null,    // Hand index of card that has just been played
-					messages: [{message: joinCode, sender: "player"}]
+					messages: [{message: "Join code: " + joinCode, sender: "player"}],
+					joinCode: joinCode   // To mirror client-side state
 				};
 			}
 			else // Second player has joined
@@ -120,8 +122,9 @@ webSocketServer.on("connection", function(socket)
 				};
 
 				// TODO: Add them to "opponent"; client can check for usernames to determine what should be shown
-				let response = {type: 'log', message: 'All players connected!'};
+				let response = {type: 'startGame', message: 'All players connected!', state: allStates[joinCode]};
 				webSocketServer.broadcast(response, joinCode);
+				sendState = false; // No need to send later
 			}
 		}
 		else if(message['type'] === 'chatMessage')
@@ -129,10 +132,21 @@ webSocketServer.on("connection", function(socket)
 			let chatMessage = message['chatMessage']; // e.g. {sender: "player", message: "Hello, there!"} or {sender: "opponent", message: "General Kenobi!"}
 			allStates[joinCode].messages.push(chatMessage);
 		}
+		else if(message['type'] === 'stateChange')
+		{
+			// TODO: Server-side validation
 
-		// All messages need to send the state back to the client
-		let response = {type: 'state', message: allStates[joinCode]};
-		webSocketServer.broadcast(response, joinCode);
+			// Update the server's state
+			message['state'].messages = allStates[joinCode].messages; // Preserve messages in case of clash between states
+			allStates[joinCode] = message['state'];
+		}
+
+		if(sendState)
+		{
+			// All messages need to send the state back to the client
+			let response = {type: 'state', message: allStates[joinCode]};
+			webSocketServer.broadcast(response, joinCode);
+		}
 	});
 });
 
