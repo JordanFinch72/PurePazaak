@@ -266,6 +266,7 @@ export class Gameboard extends React.Component
 	startTurn()
 	{
 		let currentPlayer = this.state.currentPlayer;
+		console.log(currentPlayer + "'s turn starts!");
 
 		// Check if player has stood (and therefore cannot take a turn until the end of round)
 		if(this.state[currentPlayer].hasStood)
@@ -274,9 +275,11 @@ export class Gameboard extends React.Component
 			if(this.state[oppositePlayer].hasStood)
 			{
 				// TODO: Both players have stood, so calculate result of the round
+				console.log(currentPlayer + " is standing; TODO: calculate result of round");
 			}
 			else
 			{
+				console.log(currentPlayer + " is standing; end turn");
 				// Skip player's turn, pass to next player
 				this.endTurn();
 			}
@@ -285,6 +288,7 @@ export class Gameboard extends React.Component
 		{
 			// Draw turn card from the game deck (evenly distributed deck of infinite cards, so no need for an array)
 			let cardValue = this.rand(1, 10);
+			console.log(currentPlayer + "'s turn card: " + cardValue);
 
 			// Add card to current player's card zone
 			let cardZone = this.state[currentPlayer].cardZone;
@@ -299,14 +303,15 @@ export class Gameboard extends React.Component
 				}
 			}), function()
 			{
-				if(this.state.joinCode === null)
-					this.processCPUTurn();
-				else
+				if(this.state.joinCode === null) // Singleplayer: process CPU's turn
+				{
+					if(currentPlayer === "opponent")
+						this.processCPUTurn();
+				}
+				else // Multiplayer: update server, wait for human interaction
 					this.updateServer();
 			});
 		}
-
-
 	}
 	endTurn()
 	{
@@ -378,6 +383,7 @@ export class Gameboard extends React.Component
 		// Singleplayer
 		if(this.state.joinCode === null)
 		{
+			console.log("Processing CPU turn...");
 			// Determine best move (rudimentary; can expand decision-making logic later)
 			let opponent = this.state.opponent;
 			if(opponent.roundScore > this.state.player.roundScore && this.state.player.hasStood)
@@ -502,6 +508,9 @@ export class Gameboard extends React.Component
 	}
 	initialiseGame()
 	{
+		console.log("Initialising game...");
+		console.log(this.state);
+		console.log(this.props.user);
 		let playerDeck = this.state.player.deck, opponentDeck = this.state.opponent.deck;
 		let playerHand = [], opponentHand = [];
 
@@ -525,6 +534,8 @@ export class Gameboard extends React.Component
 		// Determine first player
 		let toss = this.rand(0, 1);
 		let firstPlayer = (toss === 0) ? "player" : "opponent";
+
+		console.log(firstPlayer + " will go first!");
 
 		this.setState((prevState) => ({
 			player: {
@@ -557,14 +568,9 @@ export class Gameboard extends React.Component
 
 	componentWillMount()
 	{
-		// Singleplayer
-		if(this.state.joinCode === null)
+		// Tell multiplayer game server the join code
+		if(this.state.joinCode !== null)
 		{
-			this.initialiseGame();
-		}
-		else // Multiplayer
-		{
-			// Tell multiplayer game server the join code
 			console.log("Connecting...");
 			this.socket.onopen = () =>
 			{
@@ -592,6 +598,14 @@ export class Gameboard extends React.Component
 				}
 			};
 		}
+
+	}
+	componentDidMount()
+	{
+		if(this.state.joinCode === null)
+		{
+			this.initialiseGame();
+		}
 	}
 
 	/**
@@ -613,7 +627,8 @@ export class Gameboard extends React.Component
 	}
 	/**
 	 * Determines whether it's the specified user's turn
-	 * @param name Specified user
+	 * @param name Specified user's username
+	 * @param className True if for className label, false if not
 	 * @returns {boolean} True if their turn, false if not
 	 */
 	isTurn(name)
@@ -635,6 +650,9 @@ export class Gameboard extends React.Component
 
 	render()
 	{
+		let playerTurn = (this.state.currentPlayer === "player") ? " current-turn" : "";
+		let opponentTurn = (this.state.currentPlayer === "opponent") ? " current-turn" : "";
+
 		return (
 			<div className={"gameboard"}>
 				<div className={"third-container player-area"}>
@@ -643,7 +661,7 @@ export class Gameboard extends React.Component
 							<Label text={this.state.player.username} name={"player-name"}/>
 							<CardZone isUser={this.isUser("player")} cards={this.state.player.cardZone} onCardClick={this.onCardClick}/>
 						</div>
-						<div className={"box"}>
+						<div className={"box" + playerTurn}>
 							<Label text={this.state.player.roundScore} name={"round-score"}/>
 							<RoundCounter roundCount={this.state.player.roundCount}/>
 						</div>
@@ -673,7 +691,7 @@ export class Gameboard extends React.Component
 							<Label text={this.state.opponent.username} name={"player-name"}/>
 							<CardZone isUser={this.isUser("opponent")} cards={this.state.opponent.cardZone} onCardClick={this.onCardClick}/>
 						</div>
-						<div className={"box"}>
+						<div className={"box" + opponentTurn}>
 							<Label text={this.state.opponent.roundScore} name={"round-score"}/>
 							<RoundCounter roundCount={this.state.opponent.roundCount}/>
 						</div>

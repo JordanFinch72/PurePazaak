@@ -149,8 +149,7 @@ class App extends React.Component
 			cardZone: [],
 			roundScore: 0,
 			roundCount: 0,
-			hasStood: false,
-			isCPU: true
+			hasStood: false
 		};
 		let gameBoard = <Gameboard user={user} joinCode={null} opponent={opponent} />;
 		this.setState({currentView: gameBoard});

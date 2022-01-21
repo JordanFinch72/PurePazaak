@@ -115,6 +115,10 @@ div.label-container div.label, div.round-counter {
     border: 1px solid #585858;
     box-shadow: inset 0px 0px 4px 1px rgb(0 0 0 / 25%);
 }
+div.box.current-turn div.label-container div.label, div.box.current-turn div.round-counter {
+    box-shadow: 0px 0px 4px 1px #ffcc00, inset 0px 0px 4px 1px rgb(0 0 0 / 25%);
+}
+
 div.round-counter div.pip {
     background: #B4B4B4;
     box-shadow: 0px 0px 4px 1px rgba(0, 0, 0, 0.25), inset 0px 0px 4px 3px rgba(0, 0, 0, 0.25);
