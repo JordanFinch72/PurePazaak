@@ -1,9 +1,9 @@
-var createError = require("http-errors");
-var path = require("path");
-var cookieParser = require("cookie-parser");
-var logger = require("morgan");
-var indexRouter = require("./routes/index");
-var usersRouter = require("./routes/users");
+let createError = require("http-errors");
+let path = require("path");
+let cookieParser = require("cookie-parser");
+let logger = require("morgan");
+let indexRouter = require("./routes/index");
+let usersRouter = require("./routes/users");
 
 const express = require("express");
 const ws = require("ws");
@@ -42,10 +42,9 @@ app.use(function(err, req, res, next)
 
 module.exports = app;
 
-/* WebSocket Data */
+/* START WebSocket Server */
+// WebSocket data
 let allStates = {}; // Collection of game states (key: joinCode, value: state)
-
-/* WebSocket Server */
 const webSocketServer = new ws.WebSocketServer({noServer: true, clientTracking: true});
 
 /**
@@ -121,7 +120,6 @@ webSocketServer.on("connection", function(socket)
 					}
 				};
 
-				// TODO: Add them to "opponent"; client can check for usernames to determine what should be shown
 				let response = {type: 'startGame', message: 'All players connected!', state: allStates[joinCode]};
 				webSocketServer.broadcast(response, joinCode);
 				sendState = false; // No need to send later
@@ -159,3 +157,5 @@ server.on("upgrade", (request, socket, head) =>
 		webSocketServer.emit("connection", socket, request);
 	});
 });
+
+/* END WebSocket Server */

@@ -203,7 +203,7 @@ export class Gameboard extends React.Component
 				}
 			}), function()
 			{
-				// Detect if the winner has now won the game
+				// Detect if the winner has now won The Game
 				if(this.state[roundWinner].roundCount === 3)
 				{
 					// TODO: User wins
@@ -211,12 +211,12 @@ export class Gameboard extends React.Component
 					//          - Server will update leaderboard database with victory
 					//          - Server will end the game between the two (but won't boot them out, so they can still observe the game)
 
-					alert(roundWinner + " wins the game!");
+					alert(this.state[roundWinner].username + " wins The Game!");
 				}
 				else
 				{
-					alert(roundWinner + " wins the round!");
-					console.log(roundWinner + " wins the round!");
+					alert(this.state[roundWinner].username + " wins the round!");
+					console.log(this.state[roundWinner].username + " wins the round!");
 
 					// Clean the board
 					let currentPlayer = (this.state.currentPlayer === "player") ? "opponent" : "player";
@@ -271,18 +271,8 @@ export class Gameboard extends React.Component
 		// Check if player has stood (and therefore cannot take a turn until the end of round)
 		if(this.state[currentPlayer].hasStood)
 		{
-			let oppositePlayer = (currentPlayer === "player") ? "opponent" : "player";
-			if(this.state[oppositePlayer].hasStood)
-			{
-				// TODO: Both players have stood, so calculate result of the round
-				console.log(currentPlayer + " is standing; TODO: calculate result of round");
-			}
-			else
-			{
-				console.log(currentPlayer + " is standing; end turn");
-				// Skip player's turn, pass to next player
-				this.endTurn();
-			}
+			// Skip player's turn, pass to next player
+			this.endTurn();
 		}
 		else
 		{

@@ -186,7 +186,7 @@ class App extends React.Component
 	}
 	onCreateGameClick(e, data)
 	{
-		// Generate joinCode, allow user to copy
+		// Generate joinCode for multiplayer game
 		let joinCode = this.rand(0, 999999999);
 		this.setState({currentView: <Gameboard user={this.state.currentUser} joinCode={joinCode} opponent={null} />});
 	}
