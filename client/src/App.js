@@ -6,8 +6,8 @@ import {LoginForm} from "./components/LoginForm";
 import {RegisterForm} from "./components/RegisterForm";
 import {Gameboard} from "./components/gameboard/Gameboard";
 import {JoinGameForm} from "./components/JoinGameForm";
-
-const PouchDB = require("pouchdb");
+import axios from "axios";
+import {Leaderboards} from "./components/Leaderboards";
 
 class App extends React.Component
 {
@@ -17,29 +17,30 @@ class App extends React.Component
 
 		this.state = {
 			currentView: null,
-			currentUser: null,
-			apiResponse: "Hey"
+			currentUser: null
 		};
 
 		// List of CPU opponents for singleplayer/campaign
 		this.CPUOpponents = [
 			{
-			username: "The Champ",
-			deck: [
-				{type: "positive", value: 1},{type: "positive", value: 1},{type: "positive", value: 2},
-				{type: "negative", value: -2},{type: "positive", value: 3},{type: "positive", value: 3},
-				{type: "negative", value: -4},{type: "positive", value: 4},{type: "positive", value: 5},
-				{type: "negative", value: -6}
-			],
-			hand: [],
-			cardZone: [],
-			roundScore: 0,
-			roundCount: 0,
-			hasStood: false,
-			isCPU: true
+				username: "The Champ",
+				displayName: "The Champ",
+				deck: [
+					{type: "positive", value: 1},{type: "positive", value: 1},{type: "positive", value: 2},
+					{type: "negative", value: -2},{type: "positive", value: 3},{type: "positive", value: 3},
+					{type: "negative", value: -4},{type: "positive", value: 4},{type: "positive", value: 5},
+					{type: "negative", value: -6}
+				],
+				hand: [],
+				cardZone: [],
+				roundScore: 0,
+				roundCount: 0,
+				hasStood: false,
+				isCPU: true
 			},
 			{
 				username: "Atton Rand",
+				displayName: "Atton Rand",
 				deck: [
 					{type: "positive", value: 5},{type: "positive", value: 5},{type: "positive", value: 5},
 					{type: "negative", value: -3},{type: "positive", value: 1},{type: "positive", value: 1},
@@ -55,6 +56,7 @@ class App extends React.Component
 			},
 			{
 				username: "Pato Ado",
+				displayName: "Pato Ado",
 				deck: [
 					{type: "positive", value: 6},{type: "positive", value: 6},{type: "positive", value: 5},
 					{type: "negative", value: -5},{type: "positive", value: 1},{type: "positive", value: 1},
@@ -87,10 +89,6 @@ class App extends React.Component
 	componentWillMount()
 	{
 		this.initialise();
-
-		fetch("users")
-			.then(res => res.text())
-			.then(res => this.setState({apiResponse: res}));
 	}
 
 	/* Handlers */
@@ -130,6 +128,7 @@ class App extends React.Component
 		// Set them up with a fake name and default opponent
 		let user = {
 			username: "Nadroj H'cnif",
+			displayName: "Nadroj H'cnif",
 			deck: [
 				{type: "positive", value: 1},{type: "positive", value: 1},{type: "positive", value: 2},
 				{type: "negative", value: -2},{type: "positive", value: 3},{type: "positive", value: 3},
@@ -139,6 +138,7 @@ class App extends React.Component
 		}
 		let opponent = {
 			username: "The Champ",
+			displayName: "The Champ",
 			deck: [
 				{type: "positive", value: 1},{type: "positive", value: 1},{type: "positive", value: 2},
 				{type: "negative", value: -2},{type: "positive", value: 3},{type: "positive", value: 3},
@@ -159,9 +159,6 @@ class App extends React.Component
 		// Choose from random opponent // TODO: Progression system later, or allow players to choose opponent
 		let opponent = this.CPUOpponents[this.rand(0, this.CPUOpponents.length-1)];
 		this.setState({currentView: <Gameboard user={this.state.currentUser} opponent={opponent} joinCode={null} />});
-
-		console.log(e);
-		console.log(data);
 	}
 	onMultiplayerClick(e, data)
 	{
@@ -174,15 +171,11 @@ class App extends React.Component
 			this.setState({currentView: null});
 		}, function(){
 			this.setState({currentView: <Menu currentUser={this.state.currentUser} menuButtons={menuButtons} />});
-		})
-
-		console.log(e);
-		console.log(data);
+		});
 	}
 	onLeaderboardsClick(e, data)
 	{
-		console.log(e);
-		console.log(data);
+		this.setState({currentView: <Leaderboards />})
 	}
 	onCreateGameClick(e, data)
 	{
@@ -201,25 +194,61 @@ class App extends React.Component
 		this.setState({currentView: <Gameboard user={this.state.currentUser} joinCode={data.joinCode} opponent={null} />});
 	}
 
-	authenticateUser(e, data)
+	authenticateUser(data)
 	{
-		// TODO: Connect to database, authenticate, retrieve username/deck from database
-		data.user = { // TODO: Dummy data
-			username: "Jordan Finch " + this.rand(0, 999),
-			deck: [ // Can be changed by user at the beginning of each match (and perhaps later in a separate "Choose Deck" view); is all stored in and retrieved from database
-				{type: "positive", value: 1},{type: "positive", value: 1},{type: "positive", value: 2},
-				{type: "negative", value: -2},{type: "positive", value: 3},{type: "positive", value: 3},
-				{type: "negative", value: -4},{type: "positive", value: 4},{type: "positive", value: 5},
-				{type: "negative", value: -6}
-			]
-		};
-		this.setState({currentUser: data.user}, this.initialise);
-		console.log(e);
-		console.log(data);
+		// Connect to database, authenticate, retrieve username/deck from database
+		let username = data.username;
+		let password = data.password;
+
+		axios.get("users/"+username+"/"+password).then((response) => {
+			if(response.data.type === "error")
+			{
+				console.error(response.data.message);
+				alert(response.data.message);
+			}
+			else if(response.data.type === "success")
+			{
+				console.log(response.data);
+				if(response.data.message === "User found.")
+				{
+					this.setState({currentUser: response.data.user}, this.initialise);
+				}
+			}
+		});
 	}
-	registerUser(e, data)
+	registerUser(data)
 	{
-		console.log(e);
+		// TODO: Client-side validation
+		let errorCollector = "";
+		let username = data.username;
+		let displayName = data.displayName;
+		let password = data.password;
+		let passwordConfirm = data.passwordConfirm;
+		let email = data.email;
+		console.log(data);
+
+		// Send request to server
+		if(errorCollector.length <= 0)
+		{
+			axios.put("users/"+username+"/"+displayName+"/"+password+"/"+email).then((response) => {
+				if(response.data.type === "error")
+				{
+					if(response.data.message === "Username taken.")
+						alert("Username taken."); // TODO: Proper responses (toasts, perhaps)
+					else
+						console.error(response.data.message);
+				}
+				else if(response.data.type === "success")
+				{
+					if(response.data.message === "User created.")
+					{
+						alert("Profile created!");
+						this.initialise(); // Reset view
+					}
+				}
+			})
+		}
+
 		console.log(data);
 	}
 	rand(min, max)

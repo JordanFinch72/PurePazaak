@@ -41,9 +41,9 @@ export class LoginForm extends React.Component
 					<div><p>ENTER PASSWORD:</p></div>
 					<input type={"password"} name={"password"} placeholder={"Password..."} value={this.state.password} onChange={this.onFieldChange} />
 				</div>
-				<MenuButton text={"Login"} handler={(e) => {
+				<MenuButton text={"Login"} handler={() => {
 					let data = {username: this.state.username, password: this.state.password};
-					this.handler(e, data);
+					this.handler(data);
 				}} />
 				<MenuButton text={"Back"} handler={this.backHandler} />
 			</div>

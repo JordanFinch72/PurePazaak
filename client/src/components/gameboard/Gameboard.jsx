@@ -15,6 +15,7 @@ export class Gameboard extends React.Component
 			// Default state for Singleplayer; default state for Multiplayer is returned by server
 			player: {
 				username: this.props.user.username,
+				displayName: this.props.user.displayName,
 				deck: this.props.user.deck,
 				hand: [],
 				cardZone: [],
@@ -211,12 +212,12 @@ export class Gameboard extends React.Component
 					//          - Server will update leaderboard database with victory
 					//          - Server will end the game between the two (but won't boot them out, so they can still observe the game)
 
-					alert(this.state[roundWinner].username + " wins The Game!");
+					alert(this.state[roundWinner].displayName + " wins The Game!");
 				}
 				else
 				{
-					alert(this.state[roundWinner].username + " wins the round!");
-					console.log(this.state[roundWinner].username + " wins the round!");
+					alert(this.state[roundWinner].displayName + " wins the round!");
+					console.log(this.state[roundWinner].displayName + " wins the round!");
 
 					// Clean the board
 					let currentPlayer = (this.state.currentPlayer === "player") ? "opponent" : "player";
@@ -648,7 +649,7 @@ export class Gameboard extends React.Component
 				<div className={"third-container player-area"}>
 					<div className={"cardzone-container"}>
 						<div className={"box"}>
-							<Label text={this.state.player.username} name={"player-name"}/>
+							<Label text={this.state.player.displayName} name={"player-name"}/>
 							<CardZone isUser={this.isUser("player")} cards={this.state.player.cardZone} onCardClick={this.onCardClick}/>
 						</div>
 						<div className={"box" + playerTurn}>
@@ -657,7 +658,7 @@ export class Gameboard extends React.Component
 						</div>
 					</div>
 					<div className={"handzone-container"}>
-						<Label text={this.state.player.username + "'s Hand"} name={"player-hand"}/>
+						<Label text={this.state.player.displayName + "'s Hand"} name={"player-hand"}/>
 						<HandZone cards={this.state.player.hand} isFaceDown={this.isUser("opponent")}
 						          onCardClick={this.onCardClick} onSwitchClick={this.onSwitchClick}/>
 					</div>
@@ -665,7 +666,6 @@ export class Gameboard extends React.Component
 				<div className={"third-container chat-button-area"}>
 					<div className={"chat-box-container"}>
 						<ChatBox currentUser={this.props.user}
-						         users={[this.state.player.username, this.state.opponent.username]}
 						         messages={this.state.messages}
 						         onSendMessageClick={this.onSendMessageClick}/>
 					</div>
@@ -678,7 +678,7 @@ export class Gameboard extends React.Component
 				<div className={"third-container player-area"}>
 					<div className={"cardzone-container"}>
 						<div className={"box"}>
-							<Label text={this.state.opponent.username} name={"player-name"}/>
+							<Label text={this.state.opponent.displayName} name={"player-name"}/>
 							<CardZone isUser={this.isUser("opponent")} cards={this.state.opponent.cardZone} onCardClick={this.onCardClick}/>
 						</div>
 						<div className={"box" + opponentTurn}>
@@ -687,7 +687,7 @@ export class Gameboard extends React.Component
 						</div>
 					</div>
 					<div className={"handzone-container"}>
-						<Label text={this.state.opponent.username + "'s Hand"} name={"opponent-hand"}/>
+						<Label text={this.state.opponent.displayName + "'s Hand"} name={"opponent-hand"}/>
 						<HandZone cards={this.state.opponent.hand} isFaceDown={this.isUser("player")}
 						          onCardClick={this.onCardClick} onSwitchClick={this.onSwitchClick}/>
 					</div>

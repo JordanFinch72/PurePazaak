@@ -9,7 +9,9 @@ export class RegisterForm extends React.Component
 
 		this.state = {
 			username: "",
+			displayName: "",
 			password: "",
+			passwordConfirm: "",
 			email: ""
 		}
 
@@ -37,19 +39,27 @@ export class RegisterForm extends React.Component
 			<div className={"register-form"}>
 				<div className={"form-item-container"}>
 					<div><p>ENTER USERNAME:</p></div>
-					<input type={"text"} placeholder={"e.g. TheChamp69"} name={"username"} value={this.state.username} onChange={this.onFieldChange} />
+					<input type={"text"} placeholder={"e.g. TheChamp72"} name={"username"} value={this.state.username} onChange={this.onFieldChange} />
+				</div>
+				<div className={"form-item-container"}>
+					<div><p>ENTER DISPLAY NAME:</p></div>
+					<input type={"text"} placeholder={"e.g. The Champ"} name={"displayName"} value={this.state.displayName} onChange={this.onFieldChange} />
 				</div>
 				<div className={"form-item-container"}>
 					<div><p>ENTER PASSWORD:</p></div>
 					<input type={"password"} placeholder={""} name={"password"} value={this.state.password} onChange={this.onFieldChange} />
 				</div>
 				<div className={"form-item-container"}>
+					<div><p>CONFIRM PASSWORD:</p></div>
+					<input type={"password"} placeholder={""} name={"passwordConfirm"} value={this.state.passwordConfirm} onChange={this.onFieldChange} />
+				</div>
+				<div className={"form-item-container"}>
 					<div><p>ENTER E-MAIL:</p></div>
 					<input type={"text"} placeholder={"e.g. thechamp69@kotor.net"} name={"email"} value={this.state.email} onChange={this.onFieldChange} />
 				</div>
-				<MenuButton text={"Register"} handler={(e) => {
-					let data = {username: this.state.username, password: this.state.password, email: this.state.email};
-					this.handler(e, data);
+				<MenuButton text={"Register"} handler={() => {
+					let data = this.state;
+					this.handler(data);
 				}}  />
 				<MenuButton text={"Back"} handler={this.backHandler} />
 			</div>
