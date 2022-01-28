@@ -45,7 +45,7 @@ router.get("/:username/:password", function(req, res, next)
 
 });
 
-/* Insert/update user */
+/* Insert new user */
 router.put("/:username/:displayName/:password/:email", function(req, res, next)
 {
 	let username = req.params.username;
@@ -81,8 +81,11 @@ router.put("/:username/:displayName/:password/:email", function(req, res, next)
 						],
 						"wins": 0,
 						"losses": 0,
+						"plays": 0,
+						"win_streak": 0,
+						"lose_streak": 0,
 						"longest_win_streak": 0,
-						"longest_loss_streak": 0
+						"longest_lose_streak": 0
 					};
 					db.put(doc).then(function()
 					{
@@ -95,7 +98,54 @@ router.put("/:username/:displayName/:password/:email", function(req, res, next)
 			});
 		}
 	});
+});
 
+/* Update user play stats */
+router.put("/:username/winner", function(req, res, next)
+{
+	let username = req.params.username;
+	let winner = (req.params.winner === true || req.params.winner === "true");
+
+	db.get("user_" + username).then(function(doc)
+	{
+		let {wins, losses, plays, win_streak, lose_streak, longest_win_streak, longest_lose_streak} = doc; // Get current values
+		if(winner)
+		{
+			// Update win values
+			wins += 1; win_streak += 1;
+			longest_win_streak = Math.max(win_streak, longest_win_streak)
+			lose_streak = 0;
+		}
+		else
+		{
+			// Update loss values
+			losses += 1; lose_streak += 1;
+			longest_lose_streak = Math.max(lose_streak, longest_lose_streak);
+			win_streak = 0;
+		}
+		plays += 1;
+
+		// Put the document back
+		return db.put(({
+			...doc,
+			wins: wins,
+			losses: losses,
+			plays: plays,
+			win_streak: win_streak,
+			lose_streak: lose_streak,
+			longest_win_streak: longest_win_streak,
+			longest_lose_streak: longest_lose_streak
+		}));
+	}).then(function(response)
+	{
+		if(response.ok)
+			res.send({type: "success", message: "User created."});
+		else
+			res.send({type: "error", message: "Server error.", response: response});
+	}).catch(function(error)
+	{
+		res.send({type: "error", message: "Error: " + error.error});
+	});
 });
 
 module.exports = router;

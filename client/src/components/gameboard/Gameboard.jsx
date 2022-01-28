@@ -5,6 +5,7 @@ import {RoundCounter} from "./RoundCounter";
 import {HandZone} from "./HandZone";
 import {Button} from "../Button";
 import {ChatBox} from "./ChatBox";
+import axios from "axios";
 
 export class Gameboard extends React.Component
 {
@@ -211,8 +212,29 @@ export class Gameboard extends React.Component
 					//          - Update server with victory
 					//          - Server will update leaderboard database with victory
 					//          - Server will end the game between the two (but won't boot them out, so they can still observe the game)
-
 					alert(this.state[roundWinner].displayName + " wins The Game!");
+
+					// Multiplayer
+					if(this.state.joinCode !== null)
+					{
+						let isWinner = (this.isUser(roundWinner));
+
+						// Update leaderboard
+						axios.put("leaderboards/"+this.props.user.username+"/"+isWinner).then((response) => {
+							if(response.data.type === "error")
+							{
+								console.error(response.data.message);
+							}
+							else if(response.data.type === "success")
+							{
+								console.log(response);
+							}
+						});
+
+						// Update user stats
+
+
+					}
 				}
 				else
 				{

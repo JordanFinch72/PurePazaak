@@ -100,7 +100,8 @@ class App extends React.Component
 			menuButtons = [
 				<MenuButton text={"Sign In"} handler={this.onLoginClick} />,
 				<MenuButton text={"Register"} handler={this.onRegisterClick} />,
-				<MenuButton text={"Demo Game"} handler={this.onDemoClick} />
+				<MenuButton text={"Demo Game"} handler={this.onDemoClick} />,
+				<MenuButton text={"Leaderboards"} handler={this.onLeaderboardsClick} />
 			];
 		}
 		else
@@ -246,7 +247,7 @@ class App extends React.Component
 						this.initialise(); // Reset view
 					}
 				}
-			})
+			});
 		}
 
 		console.log(data);

@@ -49,7 +49,7 @@ export class Leaderboards extends React.Component
 		this.state = {
 			tabs: ["allTime", "daily", "weekly", "monthly"], // All tabs
 			activeTab: 0,  // Tab currently being viewed
-			leaderboards: []  // All leaderboards
+			leaderboards: {}  // All leaderboards
 		}
 
 		this.onArrowClick = this.onArrowClick.bind(this);
@@ -66,7 +66,7 @@ export class Leaderboards extends React.Component
 		this.setState({activeTab: activeTab});
 	}
 
-	componentDidMount()
+	componentWillMount()
 	{
 		axios.get("leaderboards/").then((response) => {
 			if(response.data.type === "error")
@@ -92,9 +92,16 @@ export class Leaderboards extends React.Component
 		const standings = this.state.leaderboards[activeTab];
 		activeTab = (activeTab === "allTime") ? "All Time" : activeTab.toUpperCase(); // Parse active leaderboard label
 
-		const leaderboardStandings = standings.map((user, index) => {
-			return <Standing displayName={user.displayName} wins={user.periodWins} plays={user.periodPlays} key={index} />;
-		});
+		console.log("RENDER");
+		console.log(this.state.leaderboards);
+
+		let leaderboardStandings = null;
+		if(standings !== undefined)
+		{
+			// leaderboardStandings = standings.map((user, index) => {
+			// 	return <Standing displayName={user.displayName} wins={user.periodWins} plays={user.periodPlays} key={index} />;
+			// });
+		}
 
 		return(
 			<div className={"leaderboards"}>
