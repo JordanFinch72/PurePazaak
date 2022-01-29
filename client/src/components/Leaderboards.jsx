@@ -32,10 +32,12 @@ class Standing extends React.Component
 
 	render()
 	{
+		let username = this.props.username.slice(5, this.props.username.length); // Trim the "user_" from the username
+
 		return(
 			<div className={"standing"}>
 				<div className={"rank"}>{`#${this.props.rank}`}</div>
-				<div className={"name"}>{`${this.props.username} (${this.props.displayName})`}</div>
+				<div className={"name"}>{`${username} (${this.props.displayName})`}</div>
 				<div className={"wins"}>{this.props.periodWins}</div>
 				<div className={"plays"}>{this.props.periodPlays}</div>
 			</div>
@@ -49,11 +51,11 @@ export class Leaderboards extends React.Component
 	{
 		super(props);
 		this.state = {
-			tabs:             // All tabs
+			tabs:
 				[
-					["allTime", "Wins"], ["allTime", "Win Percentage"], ["daily", "Wins"], ["daily", "Win Percentage"],
-					["weekly", "Wins"], ["weekly", "Win Percentage"], ["monthly", "Wins"], ["monthly", "Win Percentage"]
-				],
+					["allTime", "Wins"], ["allTime", "Win %"], ["daily", "Wins"], ["daily", "Win %"],
+					["weekly", "Wins"], ["weekly", "Win %"], ["monthly", "Wins"], ["monthly", "Win %"]
+				],            // All tabs
 			activeTab: 0,     // Tab currently being viewed
 			leaderboards: {}  // All leaderboards
 		}
@@ -111,9 +113,9 @@ export class Leaderboards extends React.Component
 					return b.periodWins - a.periodWins;
 				else if(sortMode === "Wins" && sortOrder === "asc") // Wins (lowest->highest)
 					return a.periodWins - b.periodWins;
-				else if(sortMode === "Win Percentage" && sortOrder === "desc")
+				else if(sortMode === "Win %" && sortOrder === "desc")
 					return (b.periodWins / b.periodPlays) - (a.periodWins / a.periodPlays);
-				else if(sortMode === "Win Percentage" && sortOrder === "asc")
+				else if(sortMode === "Win %" && sortOrder === "asc")
 					return (a.periodWins / a.periodPlays) - (b.periodWins / b.periodPlays);
 				/*else if(sortMode === "Plays" && sortOrder === "desc")
 					return b.periodPlays - a.periodPlays;

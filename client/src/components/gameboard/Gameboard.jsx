@@ -567,7 +567,9 @@ export class Gameboard extends React.Component
 		if(this.state.joinCode === null)
 		{
 			let messages = this.state.messages;
+			message.sender = this.getPlayerType(this.props.user.username);
 			messages.push(message); // Bit weird talking to a CPU but okay, whatever floats your bantha
+			this.setState({messages: messages});
 		}
 		else
 		{

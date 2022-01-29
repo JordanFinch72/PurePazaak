@@ -287,13 +287,11 @@ class App extends React.Component
 
 	render()
 	{
-		let header =
-				<div className={"header"}>
-					<h1>Pure Pazaak</h1>
-				</div>;
-		let currentView = (this.state.currentView !== null) ? this.state.currentView.type.name : null;
+		let header;
+		let view = this.state.currentView;
+		let currentView = (view !== null) ? view.type.name : null;
 
-		// Render header only if currentView is not the gameboard
+		// Render header and view-container only if currentView is not the gameboard
 		if(currentView !== "Gameboard")
 		{
 			let text = "Pure Pazaak";
@@ -301,20 +299,25 @@ class App extends React.Component
 			else if(currentView === "RegisterForm") text = "Register";
 			else if(currentView === "Leaderboards") text = "Leaderboards";
 
+			// Render header (wrapped header in container)
 			header =
+				<div className={"header-container"}>
 					<div className={"header"}>
 						<h1>{text}</h1>
-					</div>;
+					</div>
+				</div>;
+
+			// Wrap view in container before rendering
+			view =
+				<div className={"view-container"}>
+					{this.state.currentView}
+				</div>
 		}
 
 		return (
 			<div className="App">
-				<div className={"header-container"}>
-					{header}
-				</div>
-				<div className={"view-container"}>
-					{this.state.currentView}
-				</div>
+				{header}
+				{view}
 			</div>
 		);
 	}

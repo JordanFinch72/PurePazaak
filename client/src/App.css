@@ -48,6 +48,19 @@ html, body, div#root, div.App {
         max-height: initial;
     }
 }
+@keyframes gameboardWiden {
+    from {
+        width: 0;
+    }
+    to {
+        width: 100%;
+    }
+}
+@keyframes gameboardLengthen {
+    100% {
+        height: 65%;
+    }
+}
 
 /* Main View */
 div.App div.header-container {
@@ -209,6 +222,10 @@ div.leaderboards div.tabs-selector div.active-tab {
     text-align: center;
     text-transform: capitalize;
 }
+div.leaderboards div.tabs-selector div.active-tab h2 {
+    font-size: 1.4em;
+    font-weight: normal;
+}
 div.leaderboards div.leaderboard {
     display: flex;
     flex-flow: column;
@@ -267,6 +284,16 @@ div.gameboard {
     background-color: #9B9B9B;
     border: 2px solid #4F4F4F;
     box-shadow: inset 0 0 9px 5px rgb(0 0 0 / 75%);
+    overflow: hidden;
+
+    /* Experimental:
+    animation-name: gameboardWiden, gameboardLengthen;
+    animation-fill-mode: forwards;
+    animation-duration: 1000ms, 1000ms;
+    animation-delay: 0ms, 1000ms;
+    animation-timing-function: linear, linear;
+    animation-iteration-count: 1, 1;
+    */
 }
 div.third-container {
     display: flex;
@@ -487,6 +514,9 @@ div.chat-box {
     background-color: #1C2A3F;
     border: 1px solid rgba(0, 148, 255, 0.25);
     box-shadow: 0 0 16px 8px rgb(0 148 255 / 25%);
+
+    opacity: 0;
+    animation: expand 0.5s linear 1s forwards;
 }
 div.chat-box div.messages-container {
     display: flex;

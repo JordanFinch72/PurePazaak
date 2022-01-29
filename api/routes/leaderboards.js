@@ -67,25 +67,38 @@ router.put("/:username/:displayName/:winner", function(req, res, next)
 		let key = leaderboardKeys[i];
 
 		// TODO: Logic for wiping leaderboards at specific dates/intervals
-		//         - Set standings to {} instead of doc.standings to wipe before continuing with regular process
+		//         - Set standings to [] instead of doc.standings to wipe before continuing with regular process
 
 		// Update each leaderboard
 		db.get("leaderboard_"+key).then(function(doc)
 		{
 			let standings = doc.standings;
-			// User already has standing in leaderboard
-			if(standings[username] !== undefined)
+
+			// Search for username in standings
+			let usernameIndex = null;
+			for(let j = 0; j < standings.length; ++j)
 			{
-				standings[username].periodWins += modifier;
-				standings[username].periodPlays += 1;
+				if(standings[j].username === username)
+				{
+					usernameIndex = j;
+					break;
+				}
+			}
+
+			// User already has standing in leaderboard
+			if(usernameIndex !== null)
+			{
+				standings[usernameIndex].periodWins += modifier;
+				standings[usernameIndex].periodPlays += 1;
 			}
 			else // User is yet to have standing in leaderboard
 			{
-				standings[username] = {
+				standings.push({
+					username: username,
 					displayName: displayName,
 					periodWins: modifier,
 					periodPlays: 1
-				};
+				});
 			}
 			return db.put({
 				_id: doc._id,
