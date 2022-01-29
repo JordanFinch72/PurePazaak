@@ -4,6 +4,7 @@
     font-size: 16px;
 }
 
+
 html, body, div#root, div.App {
     display: flex;
     flex-flow: column;
@@ -26,15 +27,32 @@ html, body, div#root, div.App {
     font-family: 'OldRepublic';
     src: url("fonts/Old_R.ttf");
 }
+@keyframes expand {
+    from {
+        opacity: 0;
+        margin-left: 5%;
+        height: 75%;
+        width: 75%;
+    }
+    to {
+        opacity: 1;
+        margin-left: 0;
+        height: 100%;
+        width: 100%;
+    }
+}
 
 /* Main View */
 div.App div.header-container {
     display: flex;
     flex-flow: column;
     justify-content: flex-end;
+    width: 100%;
+
+    /* Centred, downward flow
     flex-basis: 50%;
     min-height: 50%;
-    width: 100%;
+     */
 }
 div.App div.header {
     width: 100%;
@@ -43,6 +61,14 @@ div.App div.header h1 {
     font-size: 2.5em;
     padding: 5px; /* Font spills over right-hand edge */
 }
+div.App div.view-container {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+div.App div.view-container div {
+    animation: expand 0.5s linear;
+}
 
 /* Main Menu */
 div.main-menu, div.login-form, div.register-form, div.leaderboards {
@@ -50,8 +76,16 @@ div.main-menu, div.login-form, div.register-form, div.leaderboards {
     flex-flow: column;
     justify-content: flex-start;
     width: 100%;
-    min-height: 50%;
     margin-top: -1px;
+
+    background: #0A2922;
+    border: 2px solid #356C5E;
+    box-sizing: border-box;
+    padding: 1em;
+    gap: 0.5em;
+
+    /* Centred, downward flow
+    min-height: 50%; */
 }
 div.buttons-container {
     display: flex;
@@ -73,6 +107,10 @@ div.menu-button, div.App div.header {
     box-sizing: border-box;
     font-size: 1.2em;
     padding: 1em;
+    user-select: none;
+}
+div.menu-button {
+    margin-bottom: -2px;
 }
 div.menu-button:hover {
     background-color: #145243;
@@ -118,11 +156,6 @@ div.login-form div.buttons-container div.menu-button, div.register-form div.butt
 }
 
 /* Leaderboards */
-div.leaderboards {
-    display: flex;
-    flex-flow: column;
-    gap: initial;
-}
 div.leaderboards div.header {
     display: flex;
     justify-content: center;
@@ -193,10 +226,11 @@ div.leaderboards div.leaderboard div.headers div.name, div.leaderboards div.lead
     border-right: 1px solid #E2E2E2;
     font-size: 1.2em;
     padding: 0.5em;
-    width: 80%;
+    width: 50%;
+    word-break: break-word;
 }
-div.leaderboards div.leaderboard div.headers div.wins, div.leaderboards div.leaderboard div.headers div.plays,
-div.leaderboards div.leaderboard div.standing div.wins, div.leaderboards div.leaderboard div.standing div.plays  {
+div.leaderboards div.leaderboard div.headers div.rank, div.leaderboards div.leaderboard div.headers div.wins, div.leaderboards div.leaderboard div.headers div.plays,
+div.leaderboards div.leaderboard div.standing div.rank, div.leaderboards div.leaderboard div.standing div.wins, div.leaderboards div.leaderboard div.standing div.plays  {
     display: flex;
     align-items: center;
     justify-content: center;

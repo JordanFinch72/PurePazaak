@@ -32,11 +32,10 @@ class Standing extends React.Component
 
 	render()
 	{
-		let username = this.props.username.slice(5, this.props.username.length);
-
 		return(
 			<div className={"standing"}>
-				<div className={"name"}>{username + " ("+this.props.displayName+")"}</div>
+				<div className={"rank"}>{`#${this.props.rank}`}</div>
+				<div className={"name"}>{`${this.props.username} (${this.props.displayName})`}</div>
 				<div className={"wins"}>{this.props.periodWins}</div>
 				<div className={"plays"}>{this.props.periodPlays}</div>
 			</div>
@@ -50,8 +49,12 @@ export class Leaderboards extends React.Component
 	{
 		super(props);
 		this.state = {
-			tabs: ["allTime", "daily", "weekly", "monthly"], // All tabs
-			activeTab: 0,  // Tab currently being viewed
+			tabs:             // All tabs
+				[
+					["allTime", "Wins"], ["allTime", "Win Percentage"], ["daily", "Wins"], ["daily", "Win Percentage"],
+					["weekly", "Wins"], ["weekly", "Win Percentage"], ["monthly", "Wins"], ["monthly", "Win Percentage"]
+				],
+			activeTab: 0,     // Tab currently being viewed
 			leaderboards: {}  // All leaderboards
 		}
 
@@ -91,25 +94,39 @@ export class Leaderboards extends React.Component
 
 	render()
 	{
-		// Render active leaderboard
-		let activeTab = this.state.tabs[this.state.activeTab];
-		const leaderboard = this.state.leaderboards[activeTab];
+		/* Render active leaderboard */
+		let activeTab = this.state.tabs[this.state.activeTab][0];  // Leaderboard label
+		const sortMode = this.state.tabs[this.state.activeTab][1]; // Leaderboard sorting order
+		let leaderboard = this.state.leaderboards[activeTab];      // Leaderboard data
 		activeTab = (activeTab === "allTime") ? "All Time" : activeTab; // Parse active leaderboard label
-
-		console.log("RENDER");
-		console.log(this.state.leaderboards);
+		const sortOrder = "desc"; // TODO: Consider allowing users to change sorting order
 
 		let leaderboardStandings = [];
 		if(leaderboard !== undefined)
 		{
-			const standings = leaderboard.standings;
-			for(const username in standings)
+			// Sort leaderboard (without mutating original array)
+			const standings = [...leaderboard.standings].sort(function(a, b)
 			{
-				if(standings.hasOwnProperty(username))
-				{
-					const {displayName, periodWins, periodPlays} = standings[username];
-					leaderboardStandings.push(<Standing username={username} displayName={displayName} periodWins={periodWins} periodPlays={periodPlays} key={username} />);
-				}
+				if(sortMode === "Wins" && sortOrder === "desc") // Wins (highest->lowest)
+					return b.periodWins - a.periodWins;
+				else if(sortMode === "Wins" && sortOrder === "asc") // Wins (lowest->highest)
+					return a.periodWins - b.periodWins;
+				else if(sortMode === "Win Percentage" && sortOrder === "desc")
+					return (b.periodWins / b.periodPlays) - (a.periodWins / a.periodPlays);
+				else if(sortMode === "Win Percentage" && sortOrder === "asc")
+					return (a.periodWins / a.periodPlays) - (b.periodWins / b.periodPlays);
+				/*else if(sortMode === "Plays" && sortOrder === "desc")
+					return b.periodPlays - a.periodPlays;
+				else if(sortMode === "Plays" && sortOrder === "asc")
+					return a.periodPlays - b.periodPlays;*/
+			});
+
+			// Generate components
+			for(let i = 0; i < standings.length; ++i)
+			{
+				let standing = standings[i];
+				const {username, displayName, periodWins, periodPlays} = standing;
+				leaderboardStandings.push(<Standing rank={i} key={i} username={username} displayName={displayName} periodWins={periodWins} periodPlays={periodPlays} />);
 			}
 		}
 
@@ -117,11 +134,14 @@ export class Leaderboards extends React.Component
 			<div className={"leaderboards"}>
 				<div className={"tabs-selector"}>
 					<Arrow orientation={"left"} onArrowClick={this.onArrowClick} />
-					<div className={"active-tab"}><h2>{activeTab}</h2></div>
+					<div className={"active-tab"}>
+						<h2>{activeTab} <span style={{color: "#E2E2E2"}}>[{sortMode}]</span></h2>
+					</div>
 					<Arrow orientation={"right"} onArrowClick={this.onArrowClick} />
 				</div>
 				<div className={"leaderboard"}>
 					<div className={"headers"}>
+						<div className={"rank"}>Rank</div>
 						<div className={"name"}>Player Name</div>
 						<div className={"wins"}>Wins</div>
 						<div className={"plays"}>Plays</div>
