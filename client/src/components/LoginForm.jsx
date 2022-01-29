@@ -33,19 +33,23 @@ export class LoginForm extends React.Component
 		// TODO: Client-side validation
 		return(
 			<div className={"login-form"}>
-				<div className={"form-item-container"}>
-					<div><p>ENTER USERNAME:</p></div>
-					<input type={"text"} name={"username"} placeholder={"Username..."} value={this.state.username} onChange={this.onFieldChange} />
+				<div className={"form-wrapper"}>
+					<div className={"form-item-container"}>
+						<div className={"item-label"}><p>ENTER USERNAME:</p></div>
+						<input type={"text"} name={"username"} placeholder={"Username..."} value={this.state.username} onChange={this.onFieldChange} />
+					</div>
+					<div className={"form-item-container"}>
+						<div className={"item-label"}><p>ENTER PASSWORD:</p></div>
+						<input type={"password"} name={"password"} placeholder={"Password..."} value={this.state.password} onChange={this.onFieldChange} />
+					</div>
 				</div>
-				<div className={"form-item-container"}>
-					<div><p>ENTER PASSWORD:</p></div>
-					<input type={"password"} name={"password"} placeholder={"Password..."} value={this.state.password} onChange={this.onFieldChange} />
+				<div className={"buttons-container"}>
+					<MenuButton text={"Login"} handler={() => {
+						let data = {username: this.state.username, password: this.state.password};
+						this.handler(data);
+					}} />
+					<MenuButton text={"Back"} handler={this.backHandler} />
 				</div>
-				<MenuButton text={"Login"} handler={() => {
-					let data = {username: this.state.username, password: this.state.password};
-					this.handler(data);
-				}} />
-				<MenuButton text={"Back"} handler={this.backHandler} />
 			</div>
 		)
 	}

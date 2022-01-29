@@ -6,10 +6,11 @@
 
 html, body, div#root, div.App {
     display: flex;
+    flex-flow: column;
     align-items: center;
     justify-content: center;
-    width: 100%;
     height: 100%;
+    min-width: 65%;
     background-color: #4F4F4F;
 }
 
@@ -25,6 +26,193 @@ html, body, div#root, div.App {
     font-family: 'OldRepublic';
     src: url("fonts/Old_R.ttf");
 }
+
+/* Main View */
+div.App div.header-container {
+    display: flex;
+    flex-flow: column;
+    justify-content: flex-end;
+    flex-basis: 50%;
+    min-height: 50%;
+    width: 100%;
+}
+div.App div.header {
+    width: 100%;
+}
+div.App div.header h1 {
+    font-size: 2.5em;
+    padding: 5px; /* Font spills over right-hand edge */
+}
+
+/* Main Menu */
+div.main-menu, div.login-form, div.register-form, div.leaderboards {
+    display: flex;
+    flex-flow: column;
+    justify-content: flex-start;
+    width: 100%;
+    min-height: 50%;
+    margin-top: -1px;
+}
+div.main-menu p, div.login-form p, div.register-form p {
+    margin: 0.5em;
+}
+div.buttons-container {
+    display: flex;
+    flex-flow: column;
+    justify-content: center;
+    cursor: default;
+}
+div.menu-button, div.App div.header {
+    display: flex;
+    flex-flow: row;
+    justify-content: center;
+    align-items: center;
+
+    text-align: center;
+    color: #FFCC00;
+
+    background-color: #0F3C31;
+    border: 2px solid #356C5E;
+    box-sizing: border-box;
+    font-size: 1.2em;
+    padding: 0.5em;
+}
+div.menu-button:hover {
+    background-color: #145243;
+}
+
+/* Login/Register Forms */
+div.form-wrapper {
+    display: flex;
+    flex-flow: column;
+    background: #0A2922;
+    border: 2px solid #356C5E;
+    box-sizing: border-box;
+    padding: 1em;
+    grid-gap: 0.5em;
+    gap: 0.5em;
+}
+div.form-item-container {
+    display: flex;
+    flex-flow: row;
+    justify-content: space-between;
+}
+div.form-item-container div.item-label {
+    color: #ffcc00;
+}
+div.form-item-container input {
+    color: #000000;
+    background-color: #959090;
+    border: 2px solid #E2E2E2;
+    box-sizing: border-box;
+    min-width: 50%;
+}
+div.form-item-container input::placeholder {
+    color: rgba(0,0,0,0.5);
+}
+div.login-form div.buttons-container, div.register-form div.buttons-container {
+    display: flex;
+    flex-flow: row;
+    justify-content: space-between;
+    cursor: default;
+}
+div.login-form div.buttons-container div.menu-button, div.register-form div.buttons-container div.menu-button {
+    flex-basis: 50%;
+}
+
+/* Leaderboards */
+div.leaderboards {
+    display: flex;
+    flex-flow: column;
+    gap: initial;
+}
+div.leaderboards div.header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    background: #0F3C31;
+    border: 2px solid #356C5E;
+    border-bottom-width: 1px;
+    box-sizing: border-box;
+}
+div.leaderboards div.header h1 {
+    color: #FFCC00;
+}
+div.leaderboards div.tabs-selector {
+    display: flex;
+    flex-flow: row;
+    align-items: center;
+
+    background: #051511;
+    border: 2px solid #356C5E;
+    border-bottom-width: 1px;
+    box-sizing: border-box;
+}
+div.leaderboards div.tabs-selector div.arrow {
+    flex-basis: 5%;
+    color: #ffffff;
+    font-weight: 600;
+    user-select: none;
+}
+div.leaderboards div.tabs-selector div.arrow:hover {
+    color: rgba(255,255,255, 0.5);
+}
+div.leaderboards div.tabs-selector div.arrow.left {
+    flex-basis: 5%;
+    transform: rotate(180deg);
+}
+div.leaderboards div.tabs-selector div.active-tab {
+    flex-basis: 90%;
+    color: #FFCC00;
+    text-align: center;
+    text-transform: capitalize;
+}
+div.leaderboards div.leaderboard {
+    display: flex;
+    flex-flow: column;
+    background: #0A2922;
+    border: 2px solid #356C5E;
+    box-sizing: border-box;
+}
+div.leaderboards div.leaderboard div.headers {
+    color: #FFCC00;
+}
+div.leaderboards div.leaderboard div.standing {
+    color: #FFFFFF;
+}
+div.leaderboards div.leaderboard div.headers, div.leaderboards div.leaderboard div.standing {
+    display: flex;
+    flex-flow: row;
+    border-bottom: 1px solid #E2E2E2;
+}
+div.leaderboards div.leaderboard div.standing:last-child {
+    border-bottom: 0;
+}
+div.leaderboards div.leaderboard div.headers div.name, div.leaderboards div.leaderboard div.standing div.name {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-right: 1px solid #E2E2E2;
+    font-size: 1.2em;
+    padding: 0.5em;
+    width: 80%;
+}
+div.leaderboards div.leaderboard div.headers div.wins, div.leaderboards div.leaderboard div.headers div.plays,
+div.leaderboards div.leaderboard div.standing div.wins, div.leaderboards div.leaderboard div.standing div.plays  {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-right: 1px solid #E2E2E2;
+    font-size: 1.2em;
+    padding: 0.5em;
+    width: 20%;
+}
+div.leaderboards div.leaderboard div.headers div.plays, div.leaderboards div.leaderboard div.standing div.plays {
+    border-right: 0;
+}
+
+
 
 /* Gameboard */
 div.gameboard {

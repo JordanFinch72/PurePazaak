@@ -54,9 +54,10 @@ router.get("/", function(req, res, next)
 });
 
 /* Update leaderboards' standings */
-router.put("/:username/:winner", function(req, res, next)
+router.put("/:username/:displayName/:winner", function(req, res, next)
 {
 	let username = req.params.username;
+	let displayName = req.params.displayName;
 	let modifier = (req.params.winner === true || req.params.winner === "true") ? 1 : 0;
 	let error = false;
 
@@ -81,6 +82,7 @@ router.put("/:username/:winner", function(req, res, next)
 			else // User is yet to have standing in leaderboard
 			{
 				standings[username] = {
+					displayName: displayName,
 					periodWins: modifier,
 					periodPlays: 1
 				};

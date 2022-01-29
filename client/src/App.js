@@ -100,8 +100,8 @@ class App extends React.Component
 			menuButtons = [
 				<MenuButton text={"Sign In"} handler={this.onLoginClick} />,
 				<MenuButton text={"Register"} handler={this.onRegisterClick} />,
-				<MenuButton text={"Demo Game"} handler={this.onDemoClick} />,
-				<MenuButton text={"Leaderboards"} handler={this.onLeaderboardsClick} />
+				<MenuButton text={"Leaderboards"} handler={this.onLeaderboardsClick} />,
+				<MenuButton text={"Demo Game"} handler={this.onDemoClick} />
 			];
 		}
 		else
@@ -176,7 +176,7 @@ class App extends React.Component
 	}
 	onLeaderboardsClick(e, data)
 	{
-		this.setState({currentView: <Leaderboards />})
+		this.setState({currentView: <Leaderboards backHandler={this.initialise} />})
 	}
 	onCreateGameClick(e, data)
 	{
@@ -259,8 +259,28 @@ class App extends React.Component
 
 	render()
 	{
+		let header;
+		let currentView = this.state.currentView.type.name;
+
+		// Render header only if currentView is not the gameboard
+		if(currentView !== "Gameboard")
+		{
+			let text = "Pure Pazaak";
+			if(currentView === "LoginForm") text = "Sign In";
+			else if(currentView === "RegisterForm") text = "Register";
+			else if(currentView === "Leaderboards") text = "Leaderboards";
+
+			header =
+				<div className={"header-container"}>
+					<div className={"header"}>
+						<h1>{text}</h1>
+					</div>
+				</div>;
+		}
+
 		return (
 			<div className="App">
+				{header}
 				{this.state.currentView}
 			</div>
 		);

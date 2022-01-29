@@ -15,7 +15,9 @@ export class Menu extends React.Component
 
 		return(
 			<div className={"main-menu"}>
-				{this.state.menuButtons}
+				<div className={"buttons-container"}>
+					{this.state.menuButtons}
+				</div>
 			</div>
 		)
 	}

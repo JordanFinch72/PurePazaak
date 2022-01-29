@@ -208,19 +208,17 @@ export class Gameboard extends React.Component
 				// Detect if the winner has now won The Game
 				if(this.state[roundWinner].roundCount === 3)
 				{
-					// TODO: User wins
-					//          - Update server with victory
-					//          - Server will update leaderboard database with victory
-					//          - Server will end the game between the two (but won't boot them out, so they can still observe the game)
 					alert(this.state[roundWinner].displayName + " wins The Game!");
 
 					// Multiplayer
+					// TODO: Test it works for both players properly
+					// TODO: Stop buttons and such from working once the game is over
 					if(this.state.joinCode !== null)
 					{
 						let isWinner = (this.isUser(roundWinner));
 
 						// Update leaderboard
-						axios.put("leaderboards/"+this.props.user.username+"/"+isWinner).then((response) => {
+						axios.put("leaderboards/"+this.props.user.username+"/"+this.props.user.displayName+"/"+isWinner).then((response) => {
 							if(response.data.type === "error")
 							{
 								console.error(response.data.message);

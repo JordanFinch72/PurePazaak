@@ -1,5 +1,6 @@
 import React from "react";
 import axios from "axios";
+import {MenuButton} from "./MenuButton";
 
 class Arrow extends React.Component
 {
@@ -31,11 +32,13 @@ class Standing extends React.Component
 
 	render()
 	{
+		let username = this.props.username.slice(5, this.props.username.length);
+
 		return(
 			<div className={"standing"}>
-				<div className={"display-name"}>{this.props.displayName}</div>
-				<div className={"wins"}>{this.props.wins}</div>
-				<div className={"plays"}>{this.props.plays}</div>
+				<div className={"name"}>{username + " ("+this.props.displayName+")"}</div>
+				<div className={"wins"}>{this.props.periodWins}</div>
+				<div className={"plays"}>{this.props.periodPlays}</div>
 			</div>
 		);
 	}
@@ -53,6 +56,7 @@ export class Leaderboards extends React.Component
 		}
 
 		this.onArrowClick = this.onArrowClick.bind(this);
+		this.backHandler = this.props.backHandler.bind(this);
 	}
 
 	onArrowClick(direction)
@@ -89,37 +93,43 @@ export class Leaderboards extends React.Component
 	{
 		// Render active leaderboard
 		let activeTab = this.state.tabs[this.state.activeTab];
-		const standings = this.state.leaderboards[activeTab];
-		activeTab = (activeTab === "allTime") ? "All Time" : activeTab.toUpperCase(); // Parse active leaderboard label
+		const leaderboard = this.state.leaderboards[activeTab];
+		activeTab = (activeTab === "allTime") ? "All Time" : activeTab; // Parse active leaderboard label
 
 		console.log("RENDER");
 		console.log(this.state.leaderboards);
 
-		let leaderboardStandings = null;
-		if(standings !== undefined)
+		let leaderboardStandings = [];
+		if(leaderboard !== undefined)
 		{
-			// leaderboardStandings = standings.map((user, index) => {
-			// 	return <Standing displayName={user.displayName} wins={user.periodWins} plays={user.periodPlays} key={index} />;
-			// });
+			const standings = leaderboard.standings;
+			for(const username in standings)
+			{
+				if(standings.hasOwnProperty(username))
+				{
+					const {displayName, periodWins, periodPlays} = standings[username];
+					leaderboardStandings.push(<Standing username={username} displayName={displayName} periodWins={periodWins} periodPlays={periodPlays} key={username} />);
+				}
+			}
 		}
 
 		return(
 			<div className={"leaderboards"}>
-				<div>
-					<h1>Leaderboards</h1>
-				</div>
 				<div className={"tabs-selector"}>
 					<Arrow orientation={"left"} onArrowClick={this.onArrowClick} />
-					<h2>{activeTab}</h2>
+					<div className={"active-tab"}><h2>{activeTab}</h2></div>
 					<Arrow orientation={"right"} onArrowClick={this.onArrowClick} />
 				</div>
 				<div className={"leaderboard"}>
 					<div className={"headers"}>
-						<div className={"display-name"}>Player Name</div>
+						<div className={"name"}>Player Name</div>
 						<div className={"wins"}>Wins</div>
 						<div className={"plays"}>Plays</div>
 					</div>
 					{leaderboardStandings}
+				</div>
+				<div className={"buttons-container"}>
+					<MenuButton text={"Back"} handler={this.backHandler} />
 				</div>
 			</div>
 		);
