@@ -48,56 +48,79 @@ router.get("/:username/:password", function(req, res, next)
 /* Insert new user */
 router.put("/:username/:displayName/:password/:email", function(req, res, next)
 {
+	// New user data
 	let username = req.params.username;
 	let displayName = req.params.displayName;
 	let password = req.params.password;
 	let email = req.params.email;
 
-	db.get("user_" + username).then(function()
+	// Server-side validation
+	let errorCollector = "";
+	if(username.length < 3)
+		errorCollector += "Username too short (min. 3 characters).\n";
+	if(username.length > 32)
+		errorCollector += "Username too long (max. 32 characters).\n";
+	if(displayName.length < 3)
+		errorCollector += "Display name too short (min. 3 characters).\n";
+	if(displayName.length > 32)
+		errorCollector += "Display name too long (max. 32 characters).\n";
+	if(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email))
+		errorCollector += "E-mail address invalid.\n";
+	if(password.length < 6)
+		errorCollector += "Password too short (min. 6 characters).\n";
+
+	if(errorCollector.length <= 0)
 	{
-		res.send({type: "error", message: "Username taken."});
-	}).catch(function(error)
-	{
-		// Username doesn't already exist; create user
-		if(error.error === "not_found")
+		db.get("user_" + username).then(function()
 		{
-			// Generate salt
-			bcrypt.genSalt(saltRounds, function(err, salt)
+			res.send({type: "error", message: "Username taken."});
+		}).catch(function(error)
+		{
+			// Username doesn't already exist; create user
+			if(error.error === "not_found")
 			{
-				// Salt and hash password
-				bcrypt.hash(password, salt, function(err, hash)
+				// Generate salt
+				bcrypt.genSalt(saltRounds, function(err, salt)
 				{
-					let doc = {
-						"_id": "user_" + username,
-						"displayName": displayName,
-						"password": hash,
-						"email": email,
-						"deck": [
-							// Can be changed by user at the beginning of each match (and perhaps later in a separate "Choose Deck" view); is all stored in and retrieved from database
-							{type: "positive", value: 1},{type: "positive", value: 1},{type: "positive", value: 2},
-							{type: "negative", value: -2},{type: "positive", value: 3},{type: "positive", value: 3},
-							{type: "negative", value: -4},{type: "positive", value: 4},{type: "positive", value: 5},
-							{type: "negative", value: -6}
-						],
-						"wins": 0,
-						"losses": 0,
-						"plays": 0,
-						"win_streak": 0,
-						"lose_streak": 0,
-						"longest_win_streak": 0,
-						"longest_lose_streak": 0
-					};
-					db.put(doc).then(function()
+					// Salt and hash password
+					bcrypt.hash(password, salt, function(err, hash)
 					{
-						res.send({type: "success", message: "User created."});
-					}).catch(function(error)
-					{
-						res.send({type: "error", message: "Error: " + error.error});
+						let doc = {
+							"_id": "user_" + username,
+							"displayName": displayName,
+							"password": hash,
+							"email": email,
+							"deck": [
+								// Can be changed by user at the beginning of each match (and perhaps later in a separate "Choose Deck" view); is all stored in and retrieved from database
+								{type: "positive", value: 1},{type: "positive", value: 1},{type: "positive", value: 2},
+								{type: "negative", value: -2},{type: "positive", value: 3},{type: "positive", value: 3},
+								{type: "negative", value: -4},{type: "positive", value: 4},{type: "positive", value: 5},
+								{type: "negative", value: -6}
+							],
+							"wins": 0,
+							"losses": 0,
+							"plays": 0,
+							"win_streak": 0,
+							"lose_streak": 0,
+							"longest_win_streak": 0,
+							"longest_lose_streak": 0
+						};
+						db.put(doc).then(function()
+						{
+							res.send({type: "success", message: "User created."});
+						}).catch(function(error)
+						{
+							res.send({type: "error", message: "Error: " + error.error});
+						});
 					});
 				});
-			});
-		}
-	});
+			}
+		});
+	}
+	else
+		res.send({type: "error", message: errorCollector});
+
+
 });
 
 /* Update user play stats */

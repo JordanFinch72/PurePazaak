@@ -198,35 +198,63 @@ class App extends React.Component
 	authenticateUser(data)
 	{
 		// Connect to database, authenticate, retrieve username/deck from database
+		let errorCollector = "";
 		let username = data.username;
 		let password = data.password;
 
-		axios.get("users/"+username+"/"+password).then((response) => {
-			if(response.data.type === "error")
-			{
-				console.error(response.data.message);
-				alert(response.data.message);
-			}
-			else if(response.data.type === "success")
-			{
-				console.log(response.data);
-				if(response.data.message === "User found.")
+		if(username === "")
+			errorCollector += "Username missing.\n";
+		if(password === "")
+			errorCollector += "Password missing.\n";
+
+		if(errorCollector.length <= 0)
+		{
+			axios.get("users/"+username+"/"+password).then((response) => {
+				if(response.data.type === "error")
 				{
-					this.setState({currentUser: response.data.user}, this.initialise);
+					console.error(response.data.message);
+					alert(response.data.message);
 				}
-			}
-		});
+				else if(response.data.type === "success")
+				{
+					console.log(response.data);
+					if(response.data.message === "User found.")
+					{
+						this.setState({currentUser: response.data.user}, this.initialise);
+					}
+				}
+			});
+		}
+		else
+			alert(errorCollector); // TODO: Proper responses (toasts, perhaps)
+
+
 	}
 	registerUser(data)
 	{
-		// TODO: Client-side validation
-		let errorCollector = "";
+		// New user data
 		let username = data.username;
 		let displayName = data.displayName;
+		let email = data.email;
 		let password = data.password;
 		let passwordConfirm = data.passwordConfirm;
-		let email = data.email;
-		console.log(data);
+
+		// Client-side validation
+		let errorCollector = "";
+		if(username.length < 3)
+			errorCollector += "Username too short (min. 3 characters).\n";
+		if(username.length > 32)
+			errorCollector += "Username too long (max. 32 characters).\n";
+		if(displayName.length < 3)
+			errorCollector += "Display name too short (min. 3 characters).\n";
+		if(displayName.length > 32)
+			errorCollector += "Display name too long (max. 32 characters).\n";
+		if(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email))
+			errorCollector += "E-mail address invalid.\n";
+		if(password.length < 6)
+			errorCollector += "Password too short (min. 6 characters).\n";
+		if(passwordConfirm !== password)
+			errorCollector += "Passwords do not match.\n";
 
 		// Send request to server
 		if(errorCollector.length <= 0)
@@ -249,8 +277,8 @@ class App extends React.Component
 				}
 			});
 		}
-
-		console.log(data);
+		else
+			alert(errorCollector); // TODO: Proper responses (toasts, perhaps)
 	}
 	rand(min, max)
 	{

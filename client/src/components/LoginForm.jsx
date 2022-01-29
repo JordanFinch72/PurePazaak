@@ -27,6 +27,14 @@ export class LoginForm extends React.Component
 			[name]: value
 		});
 	}
+	onKeyPress(event)
+	{
+		event = event.nativeEvent;
+		if(event.keyCode === 13) // Enter
+		{
+			this.handler(this.state);
+		}
+	}
 
 	render()
 	{
@@ -36,17 +44,18 @@ export class LoginForm extends React.Component
 				<div className={"form-wrapper"}>
 					<div className={"form-item-container"}>
 						<div className={"item-label"}><p>ENTER USERNAME:</p></div>
-						<input type={"text"} name={"username"} placeholder={"Username..."} value={this.state.username} onChange={this.onFieldChange} />
+						<input type={"text"} name={"username"} placeholder={"Username..."} value={this.state.username}
+						       onChange={this.onFieldChange} onKeyPress={(e) => this.onKeyPress(e)} />
 					</div>
 					<div className={"form-item-container"}>
 						<div className={"item-label"}><p>ENTER PASSWORD:</p></div>
-						<input type={"password"} name={"password"} placeholder={"Password..."} value={this.state.password} onChange={this.onFieldChange} />
+						<input type={"password"} name={"password"} placeholder={"Password..."} value={this.state.password}
+						       onChange={this.onFieldChange} onKeyPress={(e) => this.onKeyPress(e)} />
 					</div>
 				</div>
 				<div className={"buttons-container"}>
 					<MenuButton text={"Login"} handler={() => {
-						let data = {username: this.state.username, password: this.state.password};
-						this.handler(data);
+						this.handler(this.state);
 					}} />
 					<MenuButton text={"Back"} handler={this.backHandler} />
 				</div>

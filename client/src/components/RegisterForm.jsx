@@ -30,6 +30,14 @@ export class RegisterForm extends React.Component
 			[name]: value
 		});
 	}
+	onKeyPress(event)
+	{
+		event = event.nativeEvent;
+		if(event.keyCode === 13) // Enter
+		{
+			this.handler(this.state);
+		}
+	}
 
 
 	render()
@@ -40,23 +48,28 @@ export class RegisterForm extends React.Component
 				<div className={"form-wrapper"}>
 					<div className={"form-item-container"}>
 						<div className={"item-label"}><p>ENTER USERNAME:</p></div>
-						<input type={"text"} placeholder={"e.g. TheChamp72"} name={"username"} value={this.state.username} onChange={this.onFieldChange} />
+						<input type={"text"} placeholder={"e.g. TheChamp72"} name={"username"} value={this.state.username}
+						       onChange={this.onFieldChange} onKeyPress={(e) => this.onKeyPress(e)} />
 					</div>
 					<div className={"form-item-container"}>
 						<div className={"item-label"}><p>ENTER DISPLAY NAME:</p></div>
-						<input type={"text"} placeholder={"e.g. The Champ"} name={"displayName"} value={this.state.displayName} onChange={this.onFieldChange} />
+						<input type={"text"} placeholder={"e.g. The Champ"} name={"displayName"} value={this.state.displayName}
+						       onChange={this.onFieldChange} onKeyPress={(e) => this.onKeyPress(e)} />
 					</div>
 					<div className={"form-item-container"}>
 						<div className={"item-label"}><p>ENTER E-MAIL:</p></div>
-						<input type={"text"} placeholder={"e.g. thechamp72@holo.net"} name={"email"} value={this.state.email} onChange={this.onFieldChange} />
+						<input type={"text"} placeholder={"e.g. thechamp72@holo.net"} name={"email"} value={this.state.email}
+						       onChange={this.onFieldChange} onKeyPress={(e) => this.onKeyPress(e)} />
 					</div>
 					<div className={"form-item-container"}>
 						<div className={"item-label"}><p>ENTER PASSWORD:</p></div>
-						<input type={"password"} placeholder={""} name={"password"} value={this.state.password} onChange={this.onFieldChange} />
+						<input type={"password"} placeholder={""} name={"password"} value={this.state.password}
+						       onChange={this.onFieldChange} onKeyPress={(e) => this.onKeyPress(e)} />
 					</div>
 					<div className={"form-item-container"}>
 						<div className={"item-label"}><p>CONFIRM PASSWORD:</p></div>
-						<input type={"password"} placeholder={""} name={"passwordConfirm"} value={this.state.passwordConfirm} onChange={this.onFieldChange} />
+						<input type={"password"} placeholder={""} name={"passwordConfirm"} value={this.state.passwordConfirm}
+						       onChange={this.onFieldChange} onKeyPress={(e) => this.onKeyPress(e)} />
 					</div>
 				</div>
 				<div className={"buttons-container"}>
