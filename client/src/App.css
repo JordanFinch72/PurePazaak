@@ -13,6 +13,7 @@ html, body, div#root, div.App {
     height: 100%;
     min-width: 70%;
     background-color: #4F4F4F;
+    overflow: hidden;
 }
 
 @font-face {
@@ -30,15 +31,21 @@ html, body, div#root, div.App {
 @keyframes expand {
     from {
         opacity: 0;
-        margin-left: 5%;
-        height: 75%;
-        width: 75%;
+        transform: scale(0.5);
     }
     to {
         opacity: 1;
-        margin-left: 0;
-        height: 100%;
-        width: 100%;
+        transform: scale(1);
+    }
+}
+@keyframes expandContainer {
+    from {
+        opacity: 0;
+        max-height: 50%;
+    }
+    to {
+        opacity: 1;
+        max-height: initial;
     }
 }
 
@@ -65,9 +72,13 @@ div.App div.view-container {
     display: flex;
     justify-content: center;
     width: 100%;
-}
-div.App div.view-container div {
-    animation: expand 0.5s linear;
+    background: #0A2922;
+    border: 2px solid #356C5E;
+    box-sizing: border-box;
+    padding: 1em;
+    gap: 0.5em;
+
+    animation: expandContainer 0.5s linear !important;
 }
 
 /* Main Menu */
@@ -77,12 +88,8 @@ div.main-menu, div.login-form, div.register-form, div.leaderboards {
     justify-content: flex-start;
     width: 100%;
     margin-top: -1px;
-
-    background: #0A2922;
-    border: 2px solid #356C5E;
-    box-sizing: border-box;
-    padding: 1em;
     gap: 0.5em;
+    animation: expand 0.5s linear;
 
     /* Centred, downward flow
     min-height: 50%; */
@@ -91,6 +98,8 @@ div.buttons-container {
     display: flex;
     flex-flow: column;
     justify-content: center;
+    align-items: center;
+    width: 100%;
     cursor: default;
 }
 div.menu-button, div.App div.header {
@@ -98,16 +107,18 @@ div.menu-button, div.App div.header {
     flex-flow: row;
     justify-content: center;
     align-items: center;
+    width: 100%;
+    padding: 1em;
 
+    font-size: 1.2em;
     text-align: center;
     color: #FFCC00;
 
     background-color: #0F3C31;
-    border: 2px solid #356C5E;
+    border: 1px solid #356C5E;
     box-sizing: border-box;
-    font-size: 1.2em;
-    padding: 1em;
     user-select: none;
+    -webkit-user-select: none;
 }
 div.menu-button {
     margin-bottom: -2px;
@@ -204,6 +215,7 @@ div.leaderboards div.leaderboard {
     background: #0A2922;
     border: 2px solid #356C5E;
     box-sizing: border-box;
+    margin-top: -0.6em; /* Counters gap: 0.3em */
 }
 div.leaderboards div.leaderboard div.headers {
     color: #FFCC00;
