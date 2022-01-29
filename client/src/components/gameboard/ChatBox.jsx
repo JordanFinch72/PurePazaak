@@ -30,7 +30,7 @@ export class ChatBox extends React.Component
 	render()
 	{
 		let messages = [];
-		this.props.messages.map((message, index) => {
+		this.props.messages.forEach((message, index) => {
 			messages.unshift(<Message currentUser={this.props.currentUser} message={message} key={index} />); // It's done like this for scroll anchoring reasons
 		});
 

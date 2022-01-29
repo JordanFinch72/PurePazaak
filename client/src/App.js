@@ -86,7 +86,7 @@ class App extends React.Component
 
 	}
 
-	componentWillMount()
+	componentDidMount()
 	{
 		this.initialise();
 	}
@@ -98,18 +98,18 @@ class App extends React.Component
 		if(this.state.currentUser === null)
 		{
 			menuButtons = [
-				<MenuButton text={"Sign In"} handler={this.onLoginClick} />,
-				<MenuButton text={"Register"} handler={this.onRegisterClick} />,
-				<MenuButton text={"Leaderboards"} handler={this.onLeaderboardsClick} />,
-				<MenuButton text={"Demo Game"} handler={this.onDemoClick} />
+				<MenuButton text={"Sign In"} handler={this.onLoginClick} key={0} />,
+				<MenuButton text={"Register"} handler={this.onRegisterClick} key={1} />,
+				<MenuButton text={"Leaderboards"} handler={this.onLeaderboardsClick} key={2} />,
+				<MenuButton text={"Demo Game"} handler={this.onDemoClick} key={3} />
 			];
 		}
 		else
 		{
 			menuButtons = [
-				<MenuButton text={"Singleplayer"} handler={this.onSingleplayerClick} />,
-				<MenuButton text={"Multiplayer"} handler={this.onMultiplayerClick} />,
-				<MenuButton text={"Leaderboards"} handler={this.onLeaderboardsClick} />
+				<MenuButton text={"Singleplayer"} handler={this.onSingleplayerClick} key={0} />,
+				<MenuButton text={"Multiplayer"} handler={this.onMultiplayerClick} key={1} />,
+				<MenuButton text={"Leaderboards"} handler={this.onLeaderboardsClick} key={2} />
 			];
 		}
 		this.setState({currentView: <Menu currentUser={this.state.currentUser} menuButtons={menuButtons} />})
@@ -164,8 +164,8 @@ class App extends React.Component
 	onMultiplayerClick(e, data)
 	{
 		let menuButtons = [
-			<MenuButton text={"Create Game"} handler={this.onCreateGameClick} />,
-			<MenuButton text={"Join Game"} handler={this.onJoinGameClick} />
+			<MenuButton text={"Create Game"} handler={this.onCreateGameClick} key={0} />,
+			<MenuButton text={"Join Game"} handler={this.onJoinGameClick} key={1} />
 		];
 		// For React reasons, must destroy <Menu> in state.currentView before it can be replaced by a new one
 		this.setState(() => {
@@ -249,7 +249,7 @@ class App extends React.Component
 			errorCollector += "Display name too short (min. 3 characters).\n";
 		if(displayName.length > 32)
 			errorCollector += "Display name too long (max. 32 characters).\n";
-		if(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email))
+		if(/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(email))
 			errorCollector += "E-mail address invalid.\n";
 		if(password.length < 6)
 			errorCollector += "Password too short (min. 6 characters).\n";

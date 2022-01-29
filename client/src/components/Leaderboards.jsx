@@ -25,11 +25,6 @@ class Arrow extends React.Component
 
 class Standing extends React.Component
 {
-	constructor(props)
-	{
-		super(props);
-	}
-
 	render()
 	{
 		let username = this.props.username.slice(5, this.props.username.length); // Trim the "user_" from the username
@@ -121,6 +116,7 @@ export class Leaderboards extends React.Component
 					return b.periodPlays - a.periodPlays;
 				else if(sortMode === "Plays" && sortOrder === "asc")
 					return a.periodPlays - b.periodPlays;*/
+				else return 0;
 			});
 
 			// Generate components

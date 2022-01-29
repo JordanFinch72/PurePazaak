@@ -305,12 +305,12 @@ export class Gameboard extends React.Component
 			let cardZone = this.state[currentPlayer].cardZone;
 			cardZone.push({type: "turn", value: cardValue});
 
-			let roundScore = this.state[currentPlayer].roundScore; // TODO: 20 = automatic stand
+			let roundScore = this.state[currentPlayer].roundScore + cardValue; // TODO: 20 = automatic stand
 			this.setState((prevState) => ({
 				[currentPlayer]: {
 					...prevState[currentPlayer],
 					cardZone: cardZone,
-					roundScore: prevState[currentPlayer].roundScore + cardValue
+					roundScore: roundScore
 				}
 			}), function()
 			{
