@@ -21,7 +21,7 @@ export class HandZone extends React.Component
 			if(card)
 				cardComponents.push(<Card card={card} index={i} key={i} zone={"handzone"} onCardClick={this.onCardClick} onSwitchClick={this.onSwitchClick} isFaceDown={this.props.isFaceDown} />);
 			else
-				cardComponents.push(<CardSlot />);
+				cardComponents.push(<CardSlot key={i} />);
 		}
 
 

@@ -54,7 +54,7 @@ export class LoginForm extends React.Component
 					</div>
 				</div>
 				<div className={"buttons-container"}>
-					<MenuButton text={"Login"} handler={() => {
+					<MenuButton text={"Sign In"} handler={() => {
 						this.handler(this.state);
 					}} />
 					<MenuButton text={"Back"} handler={this.backHandler} />

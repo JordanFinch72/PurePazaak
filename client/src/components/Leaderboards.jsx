@@ -124,7 +124,7 @@ export class Leaderboards extends React.Component
 			{
 				let standing = standings[i];
 				const {username, displayName, periodWins, periodPlays} = standing;
-				leaderboardStandings.push(<Standing rank={i} key={i} username={username} displayName={displayName} periodWins={periodWins} periodPlays={periodPlays} />);
+				leaderboardStandings.push(<Standing rank={i+1} key={i} username={username} displayName={displayName} periodWins={periodWins} periodPlays={periodPlays} />);
 			}
 		}
 

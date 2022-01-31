@@ -84,6 +84,7 @@ webSocketServer.on("connection", function(socket)
 				allStates[joinCode] = { // Default game state
 					player: {
 						username: player.username,
+						displayName: player.displayName,
 						deck: player.deck,
 						hand: [],
 						cardZone: [],
@@ -93,6 +94,7 @@ webSocketServer.on("connection", function(socket)
 					},
 					opponent: {
 						username: "Waiting for opponent",
+						displayName: "Waiting for opponent",
 						deck: [],
 						hand: [],
 						cardZone: [],
@@ -115,6 +117,7 @@ webSocketServer.on("connection", function(socket)
 					opponent: {
 						...allStates[joinCode].opponent,
 						username: opponent.username,
+						displayName: opponent.displayName,
 						deck: opponent.deck
 					}
 				};

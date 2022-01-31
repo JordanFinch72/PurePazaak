@@ -42,12 +42,12 @@ export class Gameboard extends React.Component
 
 		this.socket = new WebSocket("ws://localhost:80", "any-protocol");
 
-		// TODO: While these are okay against the CPU, the server will need to manage the state of multiplayer games
-		//        and send the state via messages in a WebSocket.
 		this.onCardClick = this.onCardClick.bind(this);
 		this.onSwitchClick = this.onSwitchClick.bind(this);
 		this.onGameButtonClick = this.onGameButtonClick.bind(this);
 		this.onSendMessageClick = this.onSendMessageClick.bind(this);
+
+		this.initialise = (this.props.initialise) ? this.props.initialise.bind(this) : function(){};
 	}
 
 
@@ -61,52 +61,56 @@ export class Gameboard extends React.Component
 	 */
 	onCardClick(card, index, zone)
 	{
-		console.log("Click!");
-		let currentPlayer = this.state.currentPlayer;
-		console.log(currentPlayer);
-		// Check if currently active player is the user who's clicking
-		if(this.isTurn(this.props.user.username))
+		// Clicking cards does nothing once game is over
+		if(this.state.player.roundCount < 3 && this.state.opponent.roundCount < 3)
 		{
-			// Check if card has already been played
-			if(this.state.cardPlayed !== null)
+			/*console.log("Click!");*/
+			let currentPlayer = this.state.currentPlayer;
+			/*console.log(currentPlayer);*/
+			// Check if currently active player is the user who's clicking
+			if(this.isTurn(this.props.user.username))
 			{
-				console.log("Card already played.");
-				// Allow player to withdraw card (not in original game; played card will not be shown to opponent until they hit "END TURN" or "STAND")
-				if(zone === "cardzone" && card.type !== "turn")
+				// Check if card has already been played
+				if(this.state.cardPlayed !== null)
 				{
-					console.log("Clicked card in cardzone; not turn card.");
-					// Send card from CardZone to hand
-					let hand = this.state[currentPlayer].hand;
-					let cardZone = this.state[currentPlayer].cardZone;
-					let roundScore = this.state[currentPlayer].roundScore;
-					cardZone.splice(index, 1); // Remove card from CardZone
-					hand[this.state.cardPlayed] = card;
-
-					// Re-compute round score
-					if(card.type === "special")
+					/*console.log("Card already played.");*/
+					// Allow player to withdraw card (not in original game; played card will not be shown to opponent until they hit "END TURN" or "STAND")
+					if(zone === "cardzone" && card.type !== "turn")
 					{
-						// TODO: Special card handling (probably easier just to reset the score to what it was at beginning of round, or use a calculateScore() function and call that)
-					}
-					else
-					{
-						roundScore -= card.value;
-					}
+						/*console.log("Clicked card in cardzone; not turn card.");*/
+						// Send card from CardZone to hand
+						let hand = this.state[currentPlayer].hand;
+						let cardZone = this.state[currentPlayer].cardZone;
+						let roundScore = this.state[currentPlayer].roundScore;
+						cardZone.splice(index, 1); // Remove card from CardZone
+						hand[this.state.cardPlayed] = card;
 
-					this.setState((prevState) => ({
-						[currentPlayer]: {
-							...prevState[currentPlayer],
-							hand: hand,
-							cardZone: cardZone,
-							roundScore: roundScore
-						},
-						cardPlayed: null
-					}), this.updateServer);
+						// Re-compute round score
+						if(card.type === "special")
+						{
+							// TODO: Special card handling (probably easier just to reset the score to what it was at beginning of round, or use a calculateScore() function and call that)
+						}
+						else
+						{
+							roundScore -= card.value;
+						}
+
+						this.setState((prevState) => ({
+							[currentPlayer]: {
+								...prevState[currentPlayer],
+								hand: hand,
+								cardZone: cardZone,
+								roundScore: roundScore
+							},
+							cardPlayed: null
+						}), this.updateServer);
+					}
 				}
-			}
-			else if(zone === "handzone")
-			{
-				console.log("Clicked card in handzone.");
-				this.playCard(index);
+				else if(zone === "handzone")
+				{
+					/*console.log("Clicked card in handzone.");*/
+					this.playCard(index);
+				}
 			}
 		}
 	}
@@ -134,29 +138,41 @@ export class Gameboard extends React.Component
 	 */
 	onGameButtonClick(mode)
 	{
-		if(mode === "END TURN")
+		// Buttons do nothing once game is over
+		if(this.state.player.roundCount < 3 && this.state.opponent.roundCount < 3)
 		{
-			if(this.isTurn(this.props.user.username))
-				this.endTurn();
+			if(mode === "END TURN")
+			{
+				if(this.isTurn(this.props.user.username))
+					this.endTurn();
+			}
+			else if(mode === "STAND")
+			{
+				if(this.isTurn(this.props.user.username))
+					this.stand();
+			}
+			else if(mode === "FORFEIT GAME")
+			{
+				if(this.isTurn(this.props.user.username))
+					this.forfeitGame();
+			}
 		}
-		else if(mode === "STAND")
+		else if(mode === "LEAVE GAMEBOARD")
 		{
-			if(this.isTurn(this.props.user.username))
-				this.stand();
-		}
-		else if(mode === "FORFEIT GAME")
-		{
-			this.forfeitGame();
+			if(this.props.user.isQuickPlay)
+				this.initialise(); // Send user back to main menu
+			else
+				this.initialise(this.props.user); // Send user back but keep them signed in
 		}
 	}
 
 	/* Game function handlers */
 	playCard(index)
 	{
-		console.log("Play!");
+		/*console.log("Play!");*/
 		// Send card from hand to CardZone
 		let currentPlayer = this.state.currentPlayer;
-		console.log(currentPlayer);
+		/*console.log(currentPlayer);*/
 		let hand = this.state[currentPlayer].hand;
 		let card = this.state[currentPlayer].hand[index];
 		let cardZone = this.state[currentPlayer].cardZone;
@@ -164,8 +180,8 @@ export class Gameboard extends React.Component
 		delete hand[index];
 		cardZone.push(card);
 
-		console.log(currentPlayer + " is playing a card (" + index + "): ");
-		console.log(card);
+		/*console.log(currentPlayer + " is playing a card (" + index + "): ");
+		console.log(card);*/
 
 		// Re-compute round score
 		if(card.type === "special")
@@ -193,7 +209,7 @@ export class Gameboard extends React.Component
 					this.updateServer();
 			});
 	}
-	endRound(roundWinner)
+	endRound(roundWinner, opponentHasForfeited = false)
 	{
 		if(roundWinner !== "tie")
 		{
@@ -201,12 +217,12 @@ export class Gameboard extends React.Component
 			this.setState((prevState) => ({
 				[roundWinner]: {
 					...prevState[roundWinner],
-					roundCount: prevState[roundWinner].roundCount + 1
+					roundCount: ((opponentHasForfeited) ? 3 : prevState[roundWinner].roundCount + 1)
 				}
 			}), function()
 			{
 				// Detect if the winner has now won The Game
-				if(this.state[roundWinner].roundCount === 3)
+				if(this.state[roundWinner].roundCount === 3 || opponentHasForfeited)
 				{
 					alert(this.state[roundWinner].displayName + " wins The Game!");
 
@@ -230,14 +246,12 @@ export class Gameboard extends React.Component
 						});
 
 						// Update user stats
-
-
 					}
 				}
 				else
 				{
 					alert(this.state[roundWinner].displayName + " wins the round!");
-					console.log(this.state[roundWinner].displayName + " wins the round!");
+					/*console.log(this.state[roundWinner].displayName + " wins the round!");*/
 
 					// Clean the board
 					let currentPlayer = (this.state.currentPlayer === "player") ? "opponent" : "player";
@@ -287,7 +301,7 @@ export class Gameboard extends React.Component
 	startTurn()
 	{
 		let currentPlayer = this.state.currentPlayer;
-		console.log(currentPlayer + "'s turn starts!");
+		/*console.log(currentPlayer + "'s turn starts!");*/
 
 		// Check if player has stood (and therefore cannot take a turn until the end of round)
 		if(this.state[currentPlayer].hasStood)
@@ -299,7 +313,7 @@ export class Gameboard extends React.Component
 		{
 			// Draw turn card from the game deck (evenly distributed deck of infinite cards, so no need for an array)
 			let cardValue = this.rand(1, 10);
-			console.log(currentPlayer + "'s turn card: " + cardValue);
+			/*console.log(currentPlayer + "'s turn card: " + cardValue);*/
 
 			// Add card to current player's card zone
 			let cardZone = this.state[currentPlayer].cardZone;
@@ -331,13 +345,13 @@ export class Gameboard extends React.Component
 
 		if(this.detectWinner() || this.state[currentPlayer].roundScore >= 20)
 		{
-			console.log(currentPlayer + " ended their turn but automatically stood");
+			/*console.log(currentPlayer + " ended their turn but automatically stood");*/
 			// Override "END TURN" and stand instead
 			this.stand();
 		}
 		else
 		{
-			console.log(currentPlayer + " ended their turn");
+			/*console.log(currentPlayer + " ended their turn");*/
 			// End turn, pass to opponent
 			this.setState({
 				currentPlayer: nextPlayer,    // Pass turn to opponent
@@ -394,7 +408,7 @@ export class Gameboard extends React.Component
 		// Singleplayer
 		if(this.state.joinCode === null)
 		{
-			console.log("Processing CPU turn...");
+			/*console.log("Processing CPU turn...");*/
 			// Determine best move (rudimentary; can expand decision-making logic later)
 			let opponent = this.state.opponent;
 			if(opponent.roundScore > this.state.player.roundScore && this.state.player.hasStood)
@@ -466,7 +480,7 @@ export class Gameboard extends React.Component
 	}
 	hasCard(player, type, value)
 	{
-		console.log(this.state[player].hand);
+		/*console.log(this.state[player].hand);*/
 		let result = false;
 		for(let i = 0; i < 4; ++i)
 		{
@@ -474,10 +488,10 @@ export class Gameboard extends React.Component
 			{
 				let card = this.state[player].hand[i];
 				let hasCard = (card.type === type && card.value === value);
-				console.log("LOOKING FOR " + type + " " + value);
+				/*console.log("LOOKING FOR " + type + " " + value);
 				console.log("HAS CARD?: " + hasCard);
 				console.log(card);
-				console.log("INDEX: " + i);
+				console.log("INDEX: " + i);*/
 				if(hasCard)
 				{
 					result = i;
@@ -493,7 +507,7 @@ export class Gameboard extends React.Component
 		let currentPlayer = this.state.currentPlayer;
 		let nextPlayer = (currentPlayer === "player") ? "opponent" : "player";
 
-		console.log(currentPlayer + " has stood");
+		/*console.log(currentPlayer + " has stood");*/
 
 		this.setState((prevState) => ({
 			[currentPlayer]: {
@@ -515,13 +529,15 @@ export class Gameboard extends React.Component
 	}
 	forfeitGame()
 	{
-		// TODO
+		let playerType = this.getPlayerType(this.props.user.username);
+		let opponentType = (playerType === "player") ? "opponent" : "player";
+		this.endRound(opponentType, true);
 	}
 	initialiseGame()
 	{
-		console.log("Initialising game...");
+		/*console.log("Initialising game...");
 		console.log(this.state);
-		console.log(this.props.user);
+		console.log(this.props.user);*/
 		let playerDeck = this.state.player.deck, opponentDeck = this.state.opponent.deck;
 		let playerHand = [], opponentHand = [];
 
@@ -546,7 +562,7 @@ export class Gameboard extends React.Component
 		let toss = this.rand(0, 1);
 		let firstPlayer = (toss === 0) ? "player" : "opponent";
 
-		console.log(firstPlayer + " will go first!");
+		/*console.log(firstPlayer + " will go first!");*/
 
 		this.setState((prevState) => ({
 			player: {
@@ -584,17 +600,17 @@ export class Gameboard extends React.Component
 		// Tell multiplayer game server the join code
 		if(this.state.joinCode !== null)
 		{
-			console.log("Connecting...");
+			/*console.log("Connecting...");*/
 			this.socket.onopen = () =>
 			{
-				console.log("Opened! Sending join code to server...");
+				/*console.log("Opened! Sending join code to server...");*/
 				let message = {type: "connectionData", joinCode: this.state.joinCode, user: this.props.user};
 				this.socket.send(JSON.stringify(message));
 			};
 			this.socket.onmessage = (response) =>
 			{
 				response = JSON.parse(response.data);
-				console.log(response);
+				/*console.log(response);*/
 
 				if(response.type === "state")
 				{
@@ -665,6 +681,21 @@ export class Gameboard extends React.Component
 	{
 		let playerTurn = (this.state.currentPlayer === "player") ? " current-turn" : "";
 		let opponentTurn = (this.state.currentPlayer === "opponent") ? " current-turn" : "";
+		let gameButtons = [];
+		if(this.state.player.roundCount < 3 && this.state.opponent.roundCount < 3)
+		{
+			gameButtons = [
+				<Button text={"END TURN"} handler={() => this.onGameButtonClick("END TURN")}/>,
+				<Button text={"STAND"} handler={() => this.onGameButtonClick("STAND")}/>,
+				<Button text={"FORFEIT GAME"} handler={() => this.onGameButtonClick("FORFEIT GAME")}/>
+			];
+		}
+		else
+		{
+			gameButtons = [
+				<Button text={"LEAVE GAMEBOARD"} handler={() => this.onGameButtonClick("LEAVE GAMEBOARD")}/>
+			];
+		}
 
 		return (
 			<div className={"gameboard"}>
@@ -692,9 +723,7 @@ export class Gameboard extends React.Component
 						         onSendMessageClick={this.onSendMessageClick}/>
 					</div>
 					<div className={"button-container"}>
-						<Button text={"END TURN"} handler={() => this.onGameButtonClick("END TURN")}/>
-						<Button text={"STAND"} handler={() => this.onGameButtonClick("STAND")}/>
-						<Button text={"FORFEIT GAME"} handler={() => this.onGameButtonClick("FORFEIT GAME")}/>
+						{gameButtons}
 					</div>
 				</div>
 				<div className={"third-container player-area"}>

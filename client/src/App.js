@@ -16,8 +16,8 @@ class App extends React.Component
 		super(props);
 
 		this.state = {
-			currentView: null,
-			currentUser: null
+			currentView: this.props.currentView || null,
+			currentUser: this.props.currentUser || null
 		};
 
 		// List of CPU opponents for singleplayer/campaign
@@ -74,7 +74,7 @@ class App extends React.Component
 		this.initialise = this.initialise.bind(this);
 		this.onLoginClick = this.onLoginClick.bind(this);
 		this.onRegisterClick = this.onRegisterClick.bind(this);
-		this.onDemoClick = this.onDemoClick.bind(this);
+		this.onQuickPlayClick = this.onQuickPlayClick.bind(this);
 		this.onSingleplayerClick = this.onSingleplayerClick.bind(this);
 		this.onMultiplayerClick = this.onMultiplayerClick.bind(this);
 		this.onLeaderboardsClick = this.onLeaderboardsClick.bind(this);
@@ -92,16 +92,20 @@ class App extends React.Component
 	}
 
 	/* Handlers */
-	initialise()
+	initialise(currentUser = null)
 	{
+		// Only override user if there isn't one already
+		if(this.state.currentUser !== null)
+			currentUser = this.state.currentUser;
+
 		let menuButtons = [];
 		if(this.state.currentUser === null)
 		{
 			menuButtons = [
+				<MenuButton text={"Quick Play"} handler={this.onQuickPlayClick} key={3} />,
 				<MenuButton text={"Sign In"} handler={this.onLoginClick} key={0} />,
 				<MenuButton text={"Register"} handler={this.onRegisterClick} key={1} />,
-				<MenuButton text={"Leaderboards"} handler={this.onLeaderboardsClick} key={2} />,
-				<MenuButton text={"Demo Game"} handler={this.onDemoClick} key={3} />
+				<MenuButton text={"Leaderboards"} handler={this.onLeaderboardsClick} key={2} />
 			];
 		}
 		else
@@ -112,7 +116,11 @@ class App extends React.Component
 				<MenuButton text={"Leaderboards"} handler={this.onLeaderboardsClick} key={2} />
 			];
 		}
-		this.setState({currentView: <Menu currentUser={this.state.currentUser} menuButtons={menuButtons} />})
+		this.setState(() => {
+			this.setState({currentView: null, currentUser: currentUser});
+		}, function(){
+			this.setState({currentView: <Menu currentUser={this.state.currentUser} menuButtons={menuButtons} />});
+		});
 	}
 	onLoginClick()
 	{
@@ -124,7 +132,7 @@ class App extends React.Component
 		let registerForm = <RegisterForm handler={this.registerUser} backHandler={this.initialise} />;
 		this.setState({currentView: registerForm});
 	}
-	onDemoClick()
+	onQuickPlayClick()
 	{
 		// Set them up with a fake name and default opponent
 		let user = {
@@ -135,37 +143,25 @@ class App extends React.Component
 				{type: "negative", value: -2},{type: "positive", value: 3},{type: "positive", value: 3},
 				{type: "negative", value: -4},{type: "positive", value: 4},{type: "positive", value: 5},
 				{type: "negative", value: -6}
-			]
-		}
-		let opponent = {
-			username: "The Champ",
-			displayName: "The Champ",
-			deck: [
-				{type: "positive", value: 1},{type: "positive", value: 1},{type: "positive", value: 2},
-				{type: "negative", value: -2},{type: "positive", value: 3},{type: "positive", value: 3},
-				{type: "negative", value: -4},{type: "positive", value: 4},{type: "positive", value: 5},
-				{type: "negative", value: -6}
 			],
-			hand: [],
-			cardZone: [],
-			roundScore: 0,
-			roundCount: 0,
-			hasStood: false
-		};
-		let gameBoard = <Gameboard user={user} joinCode={null} opponent={opponent} />;
+			isQuickPlay: true
+		}
+		let opponent = this.CPUOpponents[this.rand(0, this.CPUOpponents.length-1)]; // Randomised opponent
+		let gameBoard = <Gameboard user={user} joinCode={null} opponent={opponent} initialise={this.initialise} />;
 		this.setState({currentView: gameBoard});
 	}
 	onSingleplayerClick(e, data)
 	{
 		// Choose from random opponent // TODO: Progression system later, or allow players to choose opponent
 		let opponent = this.CPUOpponents[this.rand(0, this.CPUOpponents.length-1)];
-		this.setState({currentView: <Gameboard user={this.state.currentUser} opponent={opponent} joinCode={null} />});
+		this.setState({currentView: <Gameboard user={this.state.currentUser} opponent={opponent} joinCode={null} initialise={this.initialise} />});
 	}
 	onMultiplayerClick(e, data)
 	{
 		let menuButtons = [
 			<MenuButton text={"Create Game"} handler={this.onCreateGameClick} key={0} />,
-			<MenuButton text={"Join Game"} handler={this.onJoinGameClick} key={1} />
+			<MenuButton text={"Join Game"} handler={this.onJoinGameClick} key={1} />,
+			<MenuButton text={"Back"} handler={this.initialise} key={2} />
 		];
 		// For React reasons, must destroy <Menu> in state.currentView before it can be replaced by a new one
 		this.setState(() => {
@@ -182,7 +178,7 @@ class App extends React.Component
 	{
 		// Generate joinCode for multiplayer game
 		let joinCode = this.rand(0, 999999999);
-		this.setState({currentView: <Gameboard user={this.state.currentUser} joinCode={joinCode} opponent={null} />});
+		this.setState({currentView: <Gameboard user={this.state.currentUser} joinCode={joinCode} opponent={null} initialise={this.initialise} />});
 	}
 	onJoinGameClick(e, data)
 	{
@@ -192,7 +188,7 @@ class App extends React.Component
 	joinGame(e, data)
 	{
 		// Create Gameboard with joinCode, which tells the Gameboard component that it's a multiplayer game
-		this.setState({currentView: <Gameboard user={this.state.currentUser} joinCode={data.joinCode} opponent={null} />});
+		this.setState({currentView: <Gameboard user={this.state.currentUser} joinCode={data.joinCode} opponent={null} initialise={this.initialise} />});
 	}
 
 	authenticateUser(data)
