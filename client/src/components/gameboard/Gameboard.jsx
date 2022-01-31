@@ -604,6 +604,8 @@ export class Gameboard extends React.Component
 			this.socket.onopen = () =>
 			{
 				/*console.log("Opened! Sending join code to server...");*/
+				console.log("SENDING USER");
+				console.log(this.props.user);
 				let message = {type: "connectionData", joinCode: this.state.joinCode, user: this.props.user};
 				this.socket.send(JSON.stringify(message));
 			};
