@@ -162,7 +162,7 @@ export class Gameboard extends React.Component
 			if(this.props.user.isQuickPlay)
 				this.initialise(); // Send user back to main menu
 			else
-				this.initialise(this.props.user); // Send user back but keep them signed in
+				this.initialise(null, this.props.user); // Send user back but keep them signed in
 		}
 	}
 
@@ -685,9 +685,9 @@ export class Gameboard extends React.Component
 		if(this.state.player.roundCount < 3 && this.state.opponent.roundCount < 3)
 		{
 			gameButtons = [
-				<Button text={"END TURN"} handler={() => this.onGameButtonClick("END TURN")}/>,
-				<Button text={"STAND"} handler={() => this.onGameButtonClick("STAND")}/>,
-				<Button text={"FORFEIT GAME"} handler={() => this.onGameButtonClick("FORFEIT GAME")}/>
+				<Button text={"END TURN"} handler={() => this.onGameButtonClick("END TURN")} key={0}/>,
+				<Button text={"STAND"} handler={() => this.onGameButtonClick("STAND")} key={1}/>,
+				<Button text={"FORFEIT GAME"} handler={() => this.onGameButtonClick("FORFEIT GAME")} key={2}f/>
 			];
 		}
 		else

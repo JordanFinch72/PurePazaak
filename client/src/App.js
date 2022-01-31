@@ -92,7 +92,7 @@ class App extends React.Component
 	}
 
 	/* Handlers */
-	initialise(currentUser = null)
+	initialise(e, currentUser = null)
 	{
 		// Only override user if there isn't one already
 		if(this.state.currentUser !== null)
